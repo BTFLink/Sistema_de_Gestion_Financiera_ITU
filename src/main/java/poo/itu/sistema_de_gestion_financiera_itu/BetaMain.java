@@ -120,21 +120,30 @@ public class BetaMain {
         listOfClientes.add(newCliente);
     }
     
-    private static void ModCliente(){
+    private static cliente SearchCliente(){
         int dnisearch,index;
         boolean found=false;
+        cliente client = null;
         System.out.print("Ingrese el dni del cliente a modificar\n>");
         dnisearch=scanner.nextInt();
         for (cliente c : listOfClientes) {
             if(c.getDni()==dnisearch){
                 found=true;
-                index=listOfClientes.indexOf(c);
+                client=c;
             }
         }
         if(found){
             System.out.println("Cliente encontrado");
         }else{
             System.out.println("No se encontro el cliente solicitado");
+        }
+        return client;
+    }
+    
+    private static void ModCliente(){
+        cliente mdcliente=SearchCliente();
+        if(mdcliente!=null){
+            
         }
     }
     
