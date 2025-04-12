@@ -11,4 +11,11 @@
         <maven.compiler.target>21</maven.compiler.target>
         <exec.mainClass>poo.itu.sistema_de_gestion_financiera_itu.Sistema_de_Gestion_Financiera_ITU</exec.mainClass>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.4.0</version>
+        </dependency>
+    </dependencies>
 </project>

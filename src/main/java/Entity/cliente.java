@@ -4,22 +4,31 @@
  */
 package Entity;
 
+import static Connections.DDBBConnection.*;
+import java.sql.ResultSet;
+import java.time.LocalDateTime;
+
 /**
  *
  * @author BTF
  */
-public class cliente {
+public class Cliente {
     
-    String ID, nombre, direccion, email;
-    int dni;
-    long telefono;
+    private String nombre, apellido, idUnicoUsuario;
+    private int dni,id;
+    private boolean activo;
+    private LocalDateTime fechaDeRegistro;
 
-    public cliente(String nombre, String direccion, String email, int dni, long telefono) {
+    public Cliente() {
+    }
+
+    public Cliente(String nombre, String apellido, String idUnicoUsuario, int dni, boolean activo, LocalDateTime fechaDeRegistro) {
         this.nombre = nombre;
-        this.direccion = direccion;
-        this.email = email;
+        this.apellido = apellido;
+        this.idUnicoUsuario = idUnicoUsuario;
         this.dni = dni;
-        this.telefono = telefono;
+        this.activo = activo;
+        this.fechaDeRegistro = fechaDeRegistro;
     }
 
     public String getNombre() {
@@ -30,28 +39,20 @@ public class cliente {
         this.nombre = nombre;
     }
 
-    public String getDireccion() {
-        return direccion;
+    public String getApellido() {
+        return apellido;
     }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
     }
 
-    public String getEmail() {
-        return email;
+    public String getIdUnicoUsuario() {
+        return idUnicoUsuario;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public long getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(long telefono) {
-        this.telefono = telefono;
+    public void setIdUnicoUsuario(String idUnicoUsuario) {
+        this.idUnicoUsuario = idUnicoUsuario;
     }
 
     public int getDni() {
@@ -62,18 +63,50 @@ public class cliente {
         this.dni = dni;
     }
 
-    public String getID() {
-        return ID;
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public LocalDateTime getFechaDeRegistro() {
+        return fechaDeRegistro;
+    }
+
+    public void setFechaDeRegistro(LocalDateTime fechaDeRegistro) {
+        this.fechaDeRegistro = fechaDeRegistro;
+    }
+
+    public int getId() {
+        return id;
     }
     
-    public void registrarCliente(String nombre, String direccion, String email, int dni, long telefono) {
-        this.dni = dni;
-        this.nombre = nombre;
-        this.direccion = direccion;
-        this.email = email;
-        this.telefono = telefono;
+    public void showData(){
+        System.out.println(String.format("""
+                                         Nombre Completo: %s
+                                         DNI: %d
+                                         Estado Activo: %s
+                                         UUID: %s
+                                         Fecha del Registro: %s
+                                         """, nombre+" "+apellido,dni,activo,
+                                         idUnicoUsuario,fechaDeRegistro));
     }
     
+    public boolean registrarCliente(){
+        String Query= "INSERT INTO `sistema_financiero`.`cliente` (`nombre`, `apellido`, `dni`, `idUnicoUsuario`) VALUES ('"+nombre+"', '"+apellido+"', '"+dni+"', generar_hex_id());";
+        String Respuesta=SendQuery(Query);
+        System.out.println("Resultado de registro: "+Respuesta);
+        return Respuesta.equals("OK");
+    }
     
-    
+    public void SearchCliente(String IDU){
+        try {
+            ResultSet Search = fetchData(IDU);
+            
+            
+        } catch (Exception e) {
+        }
+    }
 }

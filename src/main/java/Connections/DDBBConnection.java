@@ -17,7 +17,7 @@ import java.time.LocalDate;
  */
 public abstract class DDBBConnection {
 
-    private static String DB = "localhost";
+    private static String DB = "sistema_financiero";
     private static String URL = "jdbc:mysql://localhost:3306/" + DB
             + "?zeroDateTimeBehavior=round&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static String User = "root";
