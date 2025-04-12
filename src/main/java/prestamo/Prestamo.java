@@ -14,59 +14,30 @@ package prestamo;
 //Registrar múltiples préstamos por cliente, visualizándolos en la consulta detallada de cada cliente.
 
 
-public class Prestamo {
+public  abstract class Prestamo {
 
     private double monto;
     private String tipoPrestamo;
     private double tasaInteresAnual;
     private int cuotas;
-    private double montoCuotas;
-    private double totalADevolver;
     private String numeroPrestamo;
+    private TipoCuota tipoCuota;
+    protected double montoCuotas;
+    protected double totalADevolver;
 
-    public Prestamo(double monto, String tipoPrestamo, double tasaInteres, int cuotas) {
+    public Prestamo(double monto, String tipoPrestamo, double tasaInteresAnual, int cuotas, TipoCuota tipoCuota) {
         this.monto = monto;
         this.tipoPrestamo = tipoPrestamo;
         this.tasaInteresAnual = tasaInteresAnual / 100.0;
         this.cuotas = cuotas;
+        this.tipoCuota = tipoCuota;
         this.numeroPrestamo = generarNumeroPrestamoUnico();
         calcularMontoCuotas();
     }
     private String generarNumeroPrestamoUnico(){
         return "PRE-"+ System.currentTimeMillis();
     }
-    private void calcularMontoCuotas() {
-        if (tipoPrestamo.equalsIgnoreCase("personal")) {
-            calcularCuotasFijas();
-        } else if (tipoPrestamo.equalsIgnoreCase("hipotecario")) {
-            calcularCuotasVariables();
-        } else {
-            calcularCuotasFijas(); // Por defecto
-        }
-    }
-
-    // Cuotas Fijas (Cálculo Básico - Interés Simple)
-    private void calcularCuotasFijas() {
-        double interesTotal = monto * tasaInteresAnual * (double) cuotas / 12.0; // Interés simple prorrateado
-        this.totalADevolver = monto + interesTotal;
-        if (cuotas > 0) {
-            this.montoCuotas = this.totalADevolver / cuotas;
-        } else {
-            this.montoCuotas = this.totalADevolver;
-        }
-    }
-
-    // Cuotas Variables (Cálculo Básico - Simplemente el capital dividido en cuotas)
-    private void calcularCuotasVariables() {
-        this.totalADevolver = monto + (monto * tasaInteresAnual * (double) cuotas / 12.0); // Incluimos el interés total para mostrar el costo
-        if (cuotas > 0) {
-            this.montoCuotas = monto / cuotas; // La cuota variable básica solo cubre el capital
-            // En un sistema real, la parte del interés variaría según las condiciones.
-            // Aquí, para simplicidad, la cuota base es solo el capital.
-        } else {
-            this.montoCuotas = monto;
-        }
-    }
+    protected abstract void calcularMontoCuotas();
 
     public double getMonto() {
         return monto;
@@ -80,7 +51,7 @@ public class Prestamo {
         return tipoPrestamo;
     }
 
-    public void setTipoPrestamo(String tipoPrestamo) {
+    public void setTipoPrestamo(String tipoPrestamo){
         this.tipoPrestamo = tipoPrestamo;
     }
 
@@ -88,12 +59,16 @@ public class Prestamo {
         return tasaInteresAnual * 100;
     }
 
-    public void setTasaInteres(double tasaInteres) {
-        this.tasaInteresAnual = tasaInteres;
-    }
-
     public int getCuotas() {
         return cuotas;
+    }
+
+    public TipoCuota getTipoCuota() {
+        return tipoCuota;
+    }
+
+    public void setTipoCuota(TipoCuota tipoCuota) {
+        this.tipoCuota = tipoCuota;
     }
 
     public void setCuotas(int cuotas) {
@@ -123,9 +98,11 @@ public class Prestamo {
     public void setNumeroPrestamo(String numeroPrestamo) {
         this.numeroPrestamo = numeroPrestamo;
     }
+
     public void mostrarInfoPrestamo() {
         System.out.println("Número de Préstamo: " + numeroPrestamo);
         System.out.println("Tipo de Préstamo: " + tipoPrestamo);
+        System.out.println("Tipo de Cuota: " + tipoCuota);
         System.out.println("Monto Solicitado: $" + String.format("%.2f", monto));
         System.out.println("Tasa de Interés Anual: " + String.format("%.2f", getTasaInteresAnual()) + "%");
         System.out.println("Cantidad de Cuotas: " + cuotas);
