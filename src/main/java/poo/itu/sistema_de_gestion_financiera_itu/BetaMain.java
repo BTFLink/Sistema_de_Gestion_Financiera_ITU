@@ -107,91 +107,137 @@ public class BetaMain {
         String Respuestas = "";
         String nombre, apellido;
         int dni;
-        boolean registrated = false;
+        boolean flag = false;
         //Ingresos de datos basicos del Cliente
+        Cliente nclient = new Cliente();
         try {
             System.out.print("\nIngrese el Nombre del cliente\n> ");
-            nombre = scanner.nextLine();
+            nclient.setNombre(scanner.nextLine());
             System.out.print("\nIngrese el Apellido del cliente\n> ");
-            apellido = scanner.nextLine();
+            nclient.setApellido(scanner.nextLine());
             System.out.print("\nIngrese el DNI del cliente\n> ");
-            dni = scanner.nextInt();
+            nclient.setDni(scanner.nextInt());
             scanner.nextLine();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return;
         }
-        //Busqueda de registros previos de clientes
+        //Revision de Antecedentes (Si extiste el DNI registrado previamente
         try {
-            System.out.println("\nBuscando Registros Previos\n");
-            String previousSearch = "SELECT nombre,apellido,activo,idUnicoUsuario,fecha_registro FROM cliente WHERE dni = '" + dni + "'";
-            ResultSet rs = fetchData(previousSearch);
-            if (rs != null) {
-                if (rs.next()) {
-                    System.out.println("Datos encontrados\nPreparando Lista\n");
-                    do {
-                        Cliente A01 = new Cliente(rs.getString("nombre"), rs.getString("apellido"), rs.getString("idUnicoUsuario"), dni, rs.getBoolean("activo"), rs.getTimestamp("fecha_registro").toLocalDateTime());
-                        listOfClientes.add(A01);
-                    } while (rs.next());
-                    for (Cliente c : listOfClientes) {
-                        c.showData();
-                        if (c.isActivo()) {
-                            registrated = true;
-                        }
+            listOfClientes = Cliente.searchListOfClients(nclient.getDni());
+            if (!listOfClientes.isEmpty()) {
+                System.out.println("\nSe encontraron clientes con el mismo DNI");
+                for (Cliente c : listOfClientes) {
+                    c.showData();
+                    if (c.isActivo()) {
+                        flag = true;
                     }
-                    System.out.print("\n>");
-                    scanner.nextLine();
-                    if (registrated) {
-                        System.out.println("""
-                                           Cuenta activa detectada
-                                           No se puede continuar el registro del cliente
-                                           """);
+                }
+                if (flag) {
+                    System.out.println("\nCuentas activas encontadas, no puede registrarse el cliente");
+                    return;
+                }
+                System.out.print("\nNo se encontraron cuentas activas\n¿Confirmar Registro del cliente?\n (1) Si   (2) No\n>");
+                do {
+                    Respuestas = scanner.nextLine();
+                    if (Respuestas.equals("2")) {
                         return;
+                    } else if (!Respuestas.equals("1")) {
+                        System.out.println("Respuesta Invalida");
                     }
+                } while (!Respuestas.equals("1"));
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        //Intentar Registrar el Cliente
+        try {
+            do {
+                flag = nclient.registrarCliente();
+                if (!flag) {
+                    System.out.print("\nRegistro Fallido\n¿Reintentar registro del cliente?\n (1) Si   (2) No\n>");
                     do {
-                        System.out.print("""
-                                            No se detectaron cuentas activas
-                                            ¿Desea continuar?
-                                            (1) Si   (2) No
-                                        >""");
                         Respuestas = scanner.nextLine();
                         if (Respuestas.equals("2")) {
-                            System.out.println("Saliendo");
                             return;
                         } else if (!Respuestas.equals("1")) {
                             System.out.println("Respuesta Invalida");
                         }
                     } while (!Respuestas.equals("1"));
-                } else {
-                    System.out.println("Datos no encontrados");
                 }
-            } else {
-                System.out.println("""
-                                   Se obtuvo un nulo del servidor
-                                   Se recomienda negar el registro del cliente
-                                   y reintentarlo mas tarde
-                                   """);
+            } while (!flag);
+            for(int I=0; I<3;I++){
+                nclient.setIdUnicoUsuario(Cliente.solicitarUUID(nclient.getNombre(), nclient.getApellido(), nclient.getDni()));
+                if(!nclient.getIdUnicoUsuario().equals("")){
+                    break;
+                }
             }
-        } catch (SQLException e) {
+            if(!nclient.getIdUnicoUsuario().equals("")){
+                System.out.println("No se ha podido solicitar el UUID, no se pueden agregar mas datos");
+                return;
+            }
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        //Continuacion de Registro de Cliente
+
+        //Añadir Telefono
         System.out.println("\nContinuando Registro de Cliente\n");
 
-        Respuestas="";
+        Respuestas = "";
+        flag = false;
+        List<Telefono> listaDeTelefonos = new ArrayList<>();
         try {
             do {
-                Telefono telefono = new Telefono();
-                System.out.println("Ingrese el numero del telefono");
-                telefono.setNumero(scanner.nextLong());
-                scanner.nextLine();
-                do {                    
-                    
-                } while (registrated);
-            } while (registrated);
+                listaDeTelefonos.add(addTelefono(flag));
+                System.out.println("\n¿Añadir otro telefono?\n (1) SI   (2) NO");
+                do {
+                    Respuestas = scanner.nextLine();
+                    if (Respuestas.equals("2")) {
+                        break;
+                    } else if (!Respuestas.equals("1")) {
+                        System.out.println("Respuesta Invalida");
+                    }
+                } while (!Respuestas.equals("1"));
+            } while (!Respuestas.equals("2"));
         } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
 
+        
+        
+        
+        
+        
+    }
+
+    private static Telefono addTelefono(boolean flag) {
+        String Respuestas;
+        Telefono telefono = new Telefono();
+        System.out.println("Ingrese el número del telefono");
+        telefono.setNumero(scanner.nextLong());
+        scanner.nextLine();
+        if (!flag) {
+            while (!flag) {
+                System.out.println("""
+                                   ¿Este es el número principal?
+                                       (1) SI     (2) NO
+                                   """);
+                Respuestas = scanner.nextLine();
+                if (Respuestas.equals("2")) {
+                    break;
+                } else if (!Respuestas.equals("1")) {
+                    System.out.println("Respuesta Invalida");
+                }
+                flag = Respuestas.equals("1");
+            }
+            telefono.setPrincipal(flag);
+        } else {
+            telefono.setPrincipal(false);
+        }
+        telefono.setActivo(true);
+
+        return telefono;
     }
 
     private static Cliente SearchCliente() {
@@ -236,6 +282,26 @@ public class BetaMain {
             System.out.println("Cliente encontrado");
         } else {
             System.out.println("No se encontro el cliente solicitado");
+        }
+    }
+
+    private static void searchListOfClientsS(String WHERE) {
+        try {
+            System.out.println("\nBuscando Registros\n");
+            String previousSearch = "SELECT * FROM cliente " + WHERE;
+            ResultSet rs = fetchData(previousSearch);
+            if (rs != null) {
+                if (rs.next()) {
+                    do {
+                        Cliente A01 = new Cliente(rs.getString("nombre"), rs.getString("apellido"), rs.getString("idUnicoUsuario"), rs.getInt("dni"), rs.getBoolean("activo"), rs.getTimestamp("fecha_registro").toLocalDateTime());
+                        listOfClientes.add(A01);
+                    } while (rs.next());
+                }
+            } else {
+                System.out.println("Error al solicitar datos");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
     }
 
