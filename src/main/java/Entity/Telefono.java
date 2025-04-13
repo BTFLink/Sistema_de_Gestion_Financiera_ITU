@@ -4,6 +4,13 @@
  */
 package Entity;
 
+import static Connections.DDBBConnection.SendQuery;
+import static Connections.DDBBConnection.fetchData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author BTF
@@ -65,6 +72,31 @@ public class Telefono {
         System.out.println(String.format("Numero de telefono: %d\nPrincipal: %s\nActivo: %s\nCodigo del dueño: %s", numero,principal,activo,UUID));
     }
     
-    //public void 
+    public boolean registrarTelefono() {
+        String Query = "INSERT INTO `sistema_financiero`.`telefono` (`cliente_idUnicoUsuario`, `telefono`, `principal`) VALUES ('"+UUID+"', '"+numero+"', "+principal+");";
+        String Respuesta = SendQuery(Query);
+        System.out.println("Resultado de registro: " + Respuesta);
+        return Respuesta.equals("OK");
+    }
     
+    public static List<Telefono> searchListTelefono(String UUID){
+        String Query = "SELECT * FROM telefono WHERE cliente_idUnicoUsuario = '"+UUID+"';";
+        List<Telefono> telefonos = new ArrayList<>();
+        
+        try {
+            ResultSet rs = fetchData(Query);
+            while(rs.next()){
+                Telefono telefono = new Telefono();
+                telefono.setNumero(rs.getLong("numero"));
+                telefono.setPrincipal(rs.getBoolean("principal"));
+                telefono.setActivo(rs.getBoolean("activo"));
+                telefono.setUUID(UUID);
+                telefonos.add(telefono);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        return telefonos;
+    }
 }
