@@ -16,11 +16,15 @@ import java.util.List;
  * @author BTF
  */
 public class Telefono {
-    long numero;
-    boolean principal, activo;
-    String UUID;
+    private long numero;
+    private boolean principal, activo;
+    private String cliente_UUID;
 
     public Telefono() {
+        numero = 0L;
+        principal = false;
+        activo = false;
+        cliente_UUID = "";
     }
     
     public Telefono(long numero, boolean principal, boolean activo) {
@@ -33,7 +37,7 @@ public class Telefono {
         this.numero = numero;
         this.principal = principal;
         this.activo = activo;
-        this.UUID = UUID;
+        this.cliente_UUID = UUID;
     }
 
     public long getNumero() {
@@ -60,27 +64,39 @@ public class Telefono {
         this.activo = activo;
     }
 
-    public String getUUID() {
-        return UUID;
+    public String getcliente_UUID() {
+        return cliente_UUID;
     }
 
-    public void setUUID(String UUID) {
-        this.UUID = UUID;
+    public void setcliente_UUID(String UUID) {
+        this.cliente_UUID = UUID;
     }
     
     public void showInformation(){
-        System.out.println(String.format("Numero de telefono: %d\nPrincipal: %s\nActivo: %s\nCodigo del dueño: %s", numero,principal,activo,UUID));
+        System.out.println(String.format("Numero de telefono: %d\nPrincipal: %s\nActivo: %s\nCodigo del dueño: %s", numero,principal,activo,cliente_UUID));
     }
     
     public boolean registrarTelefono() {
-        String Query = "INSERT INTO `sistema_financiero`.`telefono` (`cliente_idUnicoUsuario`, `telefono`, `principal`) VALUES ('"+UUID+"', '"+numero+"', "+principal+");";
+        if(cliente_UUID.length()!=45 || numero<=999){
+            System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
+            return false;
+        }
+        String Query = "INSERT INTO `sistema_financiero`.`telefono` (`cliente_idUnicoUsuario`, `numero`, `principal`) VALUES ('"+cliente_UUID+"', '"+numero+"', "+principal+");";
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
     }
     
-    public static List<Telefono> searchListTelefono(String UUID){
-        String Query = "SELECT * FROM telefono WHERE cliente_idUnicoUsuario = '"+UUID+"';";
+    public static List<Telefono> searchListTelefonoByNumber(long numero){
+        return searchListTelefono("WHERE numero = "+numero);
+    }
+    
+    public static List<Telefono> searchListTelefonoByUUID(String UUID){
+        return searchListTelefono("WHERE cliente_idUnicoUsuario = '"+UUID+"';");
+    }
+    
+    private static List<Telefono> searchListTelefono(String WHERE){
+        String Query = "SELECT * FROM telefono "+WHERE;
         List<Telefono> telefonos = new ArrayList<>();
         
         try {
@@ -90,7 +106,7 @@ public class Telefono {
                 telefono.setNumero(rs.getLong("numero"));
                 telefono.setPrincipal(rs.getBoolean("principal"));
                 telefono.setActivo(rs.getBoolean("activo"));
-                telefono.setUUID(UUID);
+                telefono.setcliente_UUID("cliente_idUnicoUsuario");
                 telefonos.add(telefono);
             }
         } catch (SQLException e) {

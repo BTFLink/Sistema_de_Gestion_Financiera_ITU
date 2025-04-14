@@ -6,6 +6,8 @@ package poo.itu.sistema_de_gestion_financiera_itu;
 
 import static Connections.DDBBConnection.fetchData;
 import Entity.Cliente;
+import Entity.Direccion;
+import Entity.Email;
 import Entity.Telefono;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,6 +35,7 @@ public class BetaMain {
         System.out.println("LIDUC = " + LastIDUCreated);
         boolean Running = true, OTO = true;//One Time Only - Solo una vez
         do {
+            System.out.println("Welcome To The Menu");
             if (!OTO) {
                 scanner.nextLine();
             }
@@ -54,12 +57,16 @@ public class BetaMain {
                     switch (Hi) {
                         case 0:
                             HiAnw = "Hi! Nice to Meet ya :D";
+                            break;
                         case 1:
                             HiAnw = "Hello! :3";
+                            break;
                         case 2:
                             HiAnw = "Hello? :/";
+                            break;
                         case 3:
                             HiAnw = ". . . º-º)";
+                            break;
                         default:
                             HiAnw = "No body answered";
                     }
@@ -104,9 +111,7 @@ public class BetaMain {
     }
 
     private static void AddCliente() {
-        String Respuestas = "";
-        String nombre, apellido;
-        int dni;
+        String Respuestas;
         boolean flag = false;
         //Ingresos de datos basicos del Cliente
         Cliente nclient = new Cliente();
@@ -167,13 +172,13 @@ public class BetaMain {
                     } while (!Respuestas.equals("1"));
                 }
             } while (!flag);
-            for(int I=0; I<3;I++){
+            for (int I = 0; I < 3; I++) {
                 nclient.setIdUnicoUsuario(Cliente.solicitarUUID(nclient.getNombre(), nclient.getApellido(), nclient.getDni()));
-                if(!nclient.getIdUnicoUsuario().equals("")){
+                if (!nclient.getIdUnicoUsuario().equals("")) {
                     break;
                 }
             }
-            if(!nclient.getIdUnicoUsuario().equals("")){
+            if (nclient.getIdUnicoUsuario().equals("")) {
                 System.out.println("No se ha podido solicitar el UUID, no se pueden agregar mas datos");
                 return;
             }
@@ -204,11 +209,149 @@ public class BetaMain {
             System.out.println(e.getMessage());
         }
 
-        
-        
-        
-        
-        
+        //Añadir Direccion
+        Direccion direccion;
+        direccion = addDireccion();
+
+        //Añadir Email
+        Respuestas = "";
+        flag = false;
+        List<Email> listaDeEmails = new ArrayList<>();
+
+        try {
+            do {
+                listaDeEmails.add(addEmail(flag));
+                System.out.println("\n¿Añadir otro email?\n (1) SI   (2) NO");
+
+                do {
+                    Respuestas = scanner.nextLine();
+                    if (Respuestas.equals("2")) {
+                        break;
+                    } else if (!Respuestas.equals("1")) {
+                        System.out.println("Respuesta inválida");
+                    }
+                } while (!Respuestas.equals("1"));
+
+            } while (!Respuestas.equals("2"));
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        //Registrando los datos
+        direccion.setCliente_UUID(nclient.getIdUnicoUsuario());
+        try {
+            for (int I = 0; I < 3; I++) {
+                if (direccion.registrarDireccion()) {
+                    break;
+                } else if (I == 2) {
+                    System.out.println("No se logro registrar la direccion");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        for (Telefono t : listaDeTelefonos) {
+            t.setcliente_UUID(nclient.getIdUnicoUsuario());
+        }
+
+        for (Email e : listaDeEmails) {
+            e.setCliente_UUID(nclient.getIdUnicoUsuario());
+        }
+
+        int A=1;
+        try {
+            for (Telefono t : listaDeTelefonos) {
+                for (int I = 0; I < 3; I++) {
+                    if (t.registrarTelefono()) {
+                        break;
+                    } else if (I == 2) {
+                        System.out.println("No se logro registrar el "+A+"º telefono");
+                    }
+                }
+                A++;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        A=1;
+        try {
+            for (Email e : listaDeEmails) {
+                for (int I = 0; I < 3; I++) {
+                    if (e.registrarEmail()) {
+                        break;
+                    } else if (I == 2) {
+                        System.out.println("No se logro registrar el "+A+"º email");
+                    }
+                }
+                A++;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    private static Email addEmail(boolean flag) {
+        String Respuestas;
+        Email email = new Email();
+
+        System.out.println("Ingrese el correo electrónico:");
+        email.setEmail(scanner.nextLine());
+
+        if (!flag) {
+            while (!flag) {
+                System.out.println("""
+                               ¿Este es el email principal?
+                                   (1) SI     (2) NO
+                               """);
+                Respuestas = scanner.nextLine();
+                if (Respuestas.equals("2")) {
+                    break;
+                } else if (!Respuestas.equals("1")) {
+                    System.out.println("Respuesta inválida");
+                }
+                flag = Respuestas.equals("1");
+            }
+            email.setPricipal(flag);
+        } else {
+            email.setPricipal(false);
+        }
+
+        email.setActivo(true);
+
+        return email;
+    }
+
+    public static Direccion addDireccion() {
+        Direccion direccion = new Direccion();
+
+        System.out.println("Ingrese la calle:");
+        direccion.setCalle(scanner.nextLine());
+
+        System.out.println("Ingrese la numeración (\"S/N\" es valido):");
+        direccion.setNumeracion(scanner.nextLine());
+
+        System.out.println("Ingrese el piso:");
+        direccion.setPiso(scanner.nextLine());
+
+        System.out.println("Ingrese el código postal:");
+        direccion.setCodigo_postal(scanner.nextLine());
+
+        System.out.println("Ingrese la ciudad:");
+        direccion.setCiudad(scanner.nextLine());
+
+        System.out.println("Ingrese el departamento:");
+        direccion.setDepartamento(scanner.nextLine());
+
+        System.out.println("Ingrese la provincia:");
+        direccion.setProvincia(scanner.nextLine());
+
+        System.out.println("Ingrese el país:");
+        direccion.setPais(scanner.nextLine());
+
+        return direccion;
     }
 
     private static Telefono addTelefono(boolean flag) {

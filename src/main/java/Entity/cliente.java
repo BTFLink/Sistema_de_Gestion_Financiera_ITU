@@ -24,6 +24,12 @@ public class Cliente {
     private LocalDateTime fechaDeRegistro;
 
     public Cliente() {
+        this.nombre = "";
+        this.apellido = "";
+        this.idUnicoUsuario = "";
+        this.dni = 0;
+        this.activo = false;
+        this.fechaDeRegistro = LocalDateTime.MIN;
     }
 
     public Cliente(String nombre, String apellido, String idUnicoUsuario, int dni, boolean activo, LocalDateTime fechaDeRegistro) {
@@ -99,6 +105,10 @@ public class Cliente {
     }
 
     public boolean registrarCliente() {
+        if(nombre.equals("")||apellido.equals("")||dni<=10000000){
+            System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
+            return false;
+        }
         String Query = "INSERT INTO `sistema_financiero`.`cliente` (`nombre`, `apellido`, `dni`, `idUnicoUsuario`) VALUES ('" + nombre + "', '" + apellido + "', '" + dni + "', generar_hex_id());";
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
