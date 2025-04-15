@@ -2,7 +2,8 @@ package prestamo;
 
 public class PrestamoPersonal extends Prestamo {
 
-    public PrestamoPersonal(double monto, double tasaInteresAnual, int cuotas, TipoCuota tipoCuota) {
+
+    public PrestamoPersonal(double monto, double tasaInteresAnual, int cuotas,TipoCuota tipoCuota) {
         super(monto, "Personal", tasaInteresAnual, cuotas, tipoCuota);
     }
 

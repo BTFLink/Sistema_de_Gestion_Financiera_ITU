@@ -190,7 +190,7 @@ public abstract class DDBBConnection {
         return verification;
     }
 
-    //Cierra la coneccion
+    //Cierra la conexion
     public static void closeResources(Connection connection, PreparedStatement statement, ResultSet result) {
         try {
             if (result != null) {

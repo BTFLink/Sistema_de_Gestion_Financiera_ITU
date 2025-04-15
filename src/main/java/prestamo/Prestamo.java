@@ -4,6 +4,11 @@
  */
 package prestamo;
 
+import connections.DDBBConnection;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
  *
  * @author Sabrina Resca
@@ -24,6 +29,7 @@ public  abstract class Prestamo {
     private TipoCuota tipoCuota;
     protected double montoCuotas;
     protected double totalADevolver;
+    private int idPrestamoBD;
 
     public Prestamo(double monto, String tipoPrestamo, double tasaInteresAnual, int cuotas, TipoCuota tipoCuota) {
         this.monto = monto;
@@ -109,4 +115,25 @@ public  abstract class Prestamo {
         System.out.println("Monto de la Cuota: $" + String.format("%.2f", montoCuotas));
         System.out.println("Total a Devolver: $" + String.format("%.2f", totalADevolver));
     }
+    public double calcularSaldoPendiente(DDBBConnection conexion) {
+        try {
+            PagoCuotaDAO dao = new PagoCuotaDAO((Connection) conexion);
+            double pagado = dao.obtenerTotalPagado(this.idPrestamoBD); // Necesitás almacenar este ID desde la DB
+            return this.totalADevolver - pagado;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return this.totalADevolver;
+        }
+    }
+
+
+    public int getIdPrestamoBD() {
+        return idPrestamoBD;
+    }
+
+    public void setIdPrestamoBD(int idPrestamoBD) {
+        this.idPrestamoBD = idPrestamoBD;
+    }
+
+
 }
