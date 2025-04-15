@@ -88,7 +88,7 @@ public class Telefono {
     }
     
     public static List<Telefono> searchListTelefonoByNumber(long numero){
-        return searchListTelefono("WHERE numero = "+numero);
+        return searchListTelefono("WHERE numero = "+numero+"';");
     }
     
     public static List<Telefono> searchListTelefonoByUUID(String UUID){

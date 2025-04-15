@@ -29,6 +29,14 @@ public class BetaMain {
     public static void main(String[] args) {
         //AutomaticAdd();
         getLIDUC();
+        String menu = """
+                      \tMenú
+                      1) Añadir Cliente
+                      2) Modificar Cliente
+                      3) Eliminar Cliente
+                      4) HALLO :D
+                      5) Salir
+                      >""";
         String decision;
         String HiAnw;
         int Hi = 0;
@@ -40,7 +48,7 @@ public class BetaMain {
                 scanner.nextLine();
             }
             OTO = false;
-            Menu();
+            System.out.println(menu);
             decision = scanner.nextLine();
 
             switch (decision) {
@@ -48,31 +56,28 @@ public class BetaMain {
                     AddCliente();
                     break;
                 case "2":
-                    ModCliente();
+                    ModMenu();
                     break;
                 case "3":
                     DelCliente();
                     break;
                 case "4":
-                    switch (Hi) {
-                        case 0:
-                            HiAnw = "Hi! Nice to Meet ya :D";
-                            break;
-                        case 1:
-                            HiAnw = "Hello! :3";
-                            break;
-                        case 2:
-                            HiAnw = "Hello? :/";
-                            break;
-                        case 3:
-                            HiAnw = ". . . º-º)";
-                            break;
-                        default:
-                            HiAnw = "No body answered";
-                    }
+                    HiAnw = switch (Hi) {
+                        case 0 ->
+                            "Hi! Nice to Meet ya :D";
+                        case 1 ->
+                            "Hello! :3";
+                        case 2 ->
+                            "Hello? :/";
+                        case 3 ->
+                            ". . . º-º)";
+                        default ->
+                            "No body answered";
+                    };
                     System.out.println(HiAnw);
                     Hi++;
                     break;
+
                 case "5":
                     System.out.println("Exiting...");
                     Running = false;
@@ -96,18 +101,6 @@ public class BetaMain {
             System.out.println(e.getMessage());
         }
         System.out.println("LIDUC not found");
-    }
-
-    private static void Menu() {
-        System.out.print("""
-                           \tMenú
-                           1) Añadir Cliente
-                           2) Modificar Cliente
-                           3) Eliminar Cliente
-                           4) HALLO :D
-                           5) Salir
-                           >
-                           """);
     }
 
     private static void AddCliente() {
@@ -260,14 +253,14 @@ public class BetaMain {
             e.setCliente_UUID(nclient.getIdUnicoUsuario());
         }
 
-        int A=1;
+        int A = 1;
         try {
             for (Telefono t : listaDeTelefonos) {
                 for (int I = 0; I < 3; I++) {
                     if (t.registrarTelefono()) {
                         break;
                     } else if (I == 2) {
-                        System.out.println("No se logro registrar el "+A+"º telefono");
+                        System.out.println("No se logro registrar el " + A + "º telefono");
                     }
                 }
                 A++;
@@ -275,14 +268,14 @@ public class BetaMain {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        A=1;
+        A = 1;
         try {
             for (Email e : listaDeEmails) {
                 for (int I = 0; I < 3; I++) {
                     if (e.registrarEmail()) {
                         break;
                     } else if (I == 2) {
-                        System.out.println("No se logro registrar el "+A+"º email");
+                        System.out.println("No se logro registrar el " + A + "º email");
                     }
                 }
                 A++;
@@ -403,10 +396,179 @@ public class BetaMain {
         return client;
     }
 
-    private static void ModCliente() {
-        Cliente mdcliente = SearchCliente();
-        if (mdcliente != null) {
+    private static void ModMenu() {
+        String menu = """
+                    \tMenu de Modificaciones
+                    1) Modificar Cliente
+                    2) Modificar Telefono
+                    3) Modificar Email
+                    4) Modificar Direccion
+                    5) Volver al menu anterior
+                    >""";
+        String respuesta;
+        do {
+            System.out.print(menu);
+            respuesta = scanner.nextLine();
+            switch (respuesta) {
+                case "1":
+                    ModCliente();
+                    break;
+                case "2":
+                    break;
+                case "3":
+                    break;
+                case "4":
+                    break;
+                case "5":
+                    break;
+                default:
+                    System.out.println("Opcion Invalida");
+            }
+        } while (!respuesta.equals("5"));
+    }
 
+    private static void ModCliente() {
+        String UUID = "";
+        String respuesta;
+        System.out.println("Ingrese el ID unico del cliente (UUID)");
+        for (int I = 0; I < 3; I++) {
+            UUID = scanner.nextLine();
+            if (UUID.matches("^[0-9A-F]{45}$")) {
+                break;
+            } else if (I == 2) {
+                System.out.println("Ha fallado muchos intentos, volviendo");
+                return;
+            } else {
+                System.out.println("ID unico invalido");
+            }
+        }
+        Cliente mdcliente;
+        try {
+            mdcliente = Cliente.searchOneClient(UUID);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        mdcliente.showData();
+        String menu = """
+                    \t¿Que dato va a modificar?
+                    1) Nombre
+                    2) Apellido
+                    3) DNI
+                    4) Aplicar cambios
+                    5) Salir
+                    """;
+        int changes = 0;
+        do {
+            System.out.println(menu);
+            respuesta = scanner.nextLine();
+            switch (respuesta) {
+                case "1":
+                    System.out.print("\nNombre antiguo: " + mdcliente.getNombre() + "\nIngrese el nuevo nombre\n>");
+                    mdcliente.setNombre(scanner.nextLine());
+                    changes++;
+                    break;
+                case "2":
+                    System.out.print("\nApellido antiguo: " + mdcliente.getApellido() + "\nIngrese el nuevo apellido\n>");
+                    mdcliente.setApellido(scanner.nextLine());
+                    changes++;
+                    break;
+                case "3":
+                    System.out.print("\nDNI antiguo: " + mdcliente.getDni() + "\nIngrese el DNI apellido\n>");
+                    try {
+                        mdcliente.setDni(scanner.nextInt());
+                        scanner.nextLine();
+                        changes++;
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "4":
+                    if (mdcliente.actualizarCliente()) {
+                        System.out.println("Se han realizado los cambios");
+                        changes = 0;
+                    } else {
+                        System.out.println("No se aplicaron los cambios");
+                    }
+                    break;
+                case "5":
+                    if (changes != 0) {
+                        System.out.println("Quedan cambios sin aplicar\n¿Desea continuar sin realizar los cambios?\n  (1) Si   (2) No");
+                        do {
+                            respuesta = scanner.nextLine();
+                            if (respuesta.equals("2")) {
+                                return;
+                            } else if (!respuesta.equals("1")) {
+                                System.out.println("Respuesta Invalida");
+                            }
+                        } while (!respuesta.equals("1"));
+                        break;
+                    }
+                    return;
+                default:
+                    System.out.println("Opcion Invalida");
+            }
+        } while (true);
+    }
+
+    private static void ModTelefono() {
+        String UUID = "";
+        String telefono ="";
+        String respuesta;
+        System.out.println("Buscar por:\n (1) ID Cliente\n (2) Telefono");
+        do {
+            respuesta = scanner.nextLine();
+            switch (respuesta) {
+                case "1":
+                    System.out.println("Ingrese el ID unico del cliente (UUID)");
+                    for (int I = 0; I < 3; I++) {
+                        UUID = scanner.nextLine();
+                        if (UUID.matches("^[0-9A-F]{45}$")) {
+                            break;
+                        } else if (I == 2) {
+                            System.out.println("Ha fallado muchos intentos, volviendo");
+                            return;
+                        } else {
+                            System.out.println("ID unico invalido");
+                        }
+                    }
+                    break;
+                case "2":
+                    System.out.println("Ingrese el telefono del cliente");
+                    for (int I = 0; I < 3; I++) {
+                        telefono = scanner.nextLine();
+                        if (telefono.matches("^[0-9]{8,10}$")) {
+                            break;
+                        } else if (I == 2) {
+                            System.out.println("Ha fallado muchos intentos, volviendo");
+                            return;
+                        } else {
+                            System.out.println("tipo de telefono invalido");
+                        }
+                    }
+                    break;
+                default:
+                    System.out.println("Respuesta invalida");
+            }
+        } while (!(respuesta.equals("1") || respuesta.equals("2")));
+
+        List<Telefono> listaTelefonos;
+        try {
+            if(respuesta.equals("1")){
+                listaTelefonos=Telefono.searchListTelefonoByUUID(UUID);
+            }else{
+                listaTelefonos=Telefono.searchListTelefonoByNumber(Long.parseLong(telefono));
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        if(listaTelefonos.isEmpty()){
+            System.out.println("No se encontraron telefonos bajo los datos indicados");
+            return;
+        }
+        for (Telefono lt : listaTelefonos) {
+            lt.showInformation();
         }
     }
 

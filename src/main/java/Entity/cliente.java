@@ -114,6 +114,17 @@ public class Cliente {
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
     }
+    
+    public boolean actualizarCliente(){
+        if(nombre.equals("")||apellido.equals("")||dni<=10000000){
+            System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
+            return false;
+        }
+        String Query ="UPDATE `sistema_financiero`.`cliente` SET `nombre` = '"+nombre+"', `apellido` = '"+apellido+"', `dni` = '"+dni+"' WHERE idUnicoUsuario = '"+idUnicoUsuario+"');";
+        String Respuesta = SendQuery(Query);
+        System.out.println("Resultado de registro: " + Respuesta);
+        return Respuesta.equals("OK");
+    }
 
     public static List<Cliente> searchListOfClients(int DNI) {
         return searchListofClient("WHERE dni = " + DNI);
@@ -162,25 +173,25 @@ public class Cliente {
         return clientes;
     }
 
-    public static Cliente searchOneClient(int DNI, boolean activo) {
-        return searchAClient("WHERE dni = " + DNI,activo);
+    public static Cliente searchOneClient(int DNI) {
+        return searchAClient("WHERE dni = " + DNI);
     }
 
-    public static Cliente searchOneClient(String Nombre, String Apellido, boolean activo) {
-        return searchAClient("WHERE nombre LIKE '" + Nombre + "' AND apellido LIKE '" + Apellido + "'",activo);
+    public static Cliente searchOneClient(String Nombre, String Apellido) {
+        return searchAClient("WHERE nombre LIKE '" + Nombre + "' AND apellido LIKE '" + Apellido + "'");
     }
 
-    public static Cliente searchOneClient(String UUID, boolean activo) {
-        return searchAClient("WHERE idUnicoUsuario = '" + UUID + "'",activo);
+    public static Cliente searchOneClient(String UUID) {
+        return searchAClient("WHERE idUnicoUsuario = '" + UUID + "'");
     }
 
-    public static Cliente searchOneClient(LocalDateTime fecha_registro, boolean activo) {
-        return searchAClient("WHERE fecha_registro = '" + Timestamp.valueOf(fecha_registro) + "'",activo);
+    public static Cliente searchOneClient(LocalDateTime fecha_registro) {
+        return searchAClient("WHERE fecha_registro = '" + Timestamp.valueOf(fecha_registro) + "'");
     }
 
-    private static Cliente searchAClient(String WHERE, boolean activo) {
+    private static Cliente searchAClient(String WHERE) {
 
-        String query = "SELECT * FROM cliente " + WHERE + " AND activo = "+activo;
+        String query = "SELECT * FROM cliente " + WHERE + " AND activo = true";
         Cliente cliente = new Cliente();
         try {
             ResultSet rs = fetchData(query);
