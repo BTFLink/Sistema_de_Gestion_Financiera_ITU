@@ -18,18 +18,18 @@ import java.util.List;
 public class Email {
 
     private String cliente_UUID, email;
-    private boolean pricipal, activo;
+    private boolean principal, activo;
 
     public Email() {
         cliente_UUID = "";
         email = "";
-        pricipal = false;
+        principal = false;
         activo = false;
     }
 
     public Email(String email, boolean pricipal, boolean activo) {
         this.email = email;
-        this.pricipal = pricipal;
+        this.principal = pricipal;
         this.activo = activo;
     }
 
@@ -49,12 +49,12 @@ public class Email {
         this.email = email;
     }
 
-    public boolean isPricipal() {
-        return pricipal;
+    public boolean isPrincipal() {
+        return principal;
     }
 
-    public void setPricipal(boolean pricipal) {
-        this.pricipal = pricipal;
+    public void setPrincipal(boolean principal) {
+        this.principal = principal;
     }
 
     public boolean isActivo() {
@@ -66,7 +66,15 @@ public class Email {
     }
 
     public void showInformation() {
-        System.out.println(String.format("Email: %s\nPrincipal: %s\nActivo: %s\nCodigo del dueño: %s", email, pricipal, activo, cliente_UUID));
+        System.out.println(String.format("Email: %s\nPrincipal: %s\nActivo: %s\nCodigo del dueño: %s", email, principal, activo, cliente_UUID));
+    }
+    
+    public static void showListInformation(List<Email> le){
+        int counter=1;
+        for (Email email : le) {
+            System.out.println("Index del email: "+counter);
+            email.showInformation();
+        }
     }
 
     public boolean registrarEmail() {
@@ -75,9 +83,21 @@ public class Email {
             return false;
         }
         String query = "INSERT INTO `sistema_financiero`.`email` (`cliente_idUnicoUsuario`, `email`, `principal`) VALUES ('"
-                + cliente_UUID + "', '" + email + "', " + pricipal + ");";
+                + cliente_UUID + "', '" + email + "', " + principal + ");";
         String respuesta = SendQuery(query);
         System.out.println("Resultado de registro: " + respuesta);
+        return respuesta.equals("OK");
+    }
+    
+    public boolean actualizarEmail() {
+        if (cliente_UUID.length() != 45 || email == null || email.length() < 5) {
+            System.out.println("Datos mínimos no encontrados, cancelando actualizacion de datos");
+            return false;
+        }
+        String query = "UPDATE `sistema_financiero`.`email` SET `email` = '"+email+"', `principal` = '"+principal+"', `activo` = '"+activo+"' "
+                + "WHERE `cliente_idUnicoUsuario` = '"+cliente_UUID+"';";
+        String respuesta = SendQuery(query);
+        System.out.println("Resultado de actualizacion: " + respuesta);
         return respuesta.equals("OK");
     }
 
@@ -98,7 +118,7 @@ public class Email {
             while (rs.next()) {
                 Email emailObj = new Email();
                 emailObj.setEmail(rs.getString("email"));
-                emailObj.setPricipal(rs.getBoolean("principal"));
+                emailObj.setPrincipal(rs.getBoolean("principal"));
                 emailObj.setActivo(rs.getBoolean("activo"));
                 emailObj.setCliente_UUID(rs.getString("cliente_idUnicoUsuario"));
                 emails.add(emailObj);

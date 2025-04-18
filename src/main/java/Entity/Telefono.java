@@ -76,12 +76,31 @@ public class Telefono {
         System.out.println(String.format("Numero de telefono: %d\nPrincipal: %s\nActivo: %s\nCodigo del dueño: %s", numero,principal,activo,cliente_UUID));
     }
     
+    public static void showListInformation(List<Telefono> lt){
+        int counter=1;
+        for (Telefono telefono : lt) {
+            System.out.println("Index del telefono: "+counter);
+            telefono.showInformation();
+        }
+    }
+    
     public boolean registrarTelefono() {
         if(cliente_UUID.length()!=45 || numero<=999){
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
         String Query = "INSERT INTO `sistema_financiero`.`telefono` (`cliente_idUnicoUsuario`, `numero`, `principal`) VALUES ('"+cliente_UUID+"', '"+numero+"', "+principal+");";
+        String Respuesta = SendQuery(Query);
+        System.out.println("Resultado de registro: " + Respuesta);
+        return Respuesta.equals("OK");
+    }
+    
+    public boolean actualizarTelefono() {
+        if(cliente_UUID.length()!=45 || numero<=999){
+            System.out.println("Datos Minimos no encontrados, cancelando actualizacion de datos");
+            return false;
+        }
+        String Query = "UPDATE `sistema_financiero`.`telefono` SET `numero` = '"+numero+"', `principal` = '"+principal+"', `activo` = '"+activo+"' WHERE `cliente_idUnicoUsuario` = '"+cliente_UUID+"';";
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");

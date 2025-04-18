@@ -93,6 +93,10 @@ public class Cliente {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void showData() {
         System.out.println(String.format("""
                                          Nombre Completo: %s
@@ -104,8 +108,16 @@ public class Cliente {
                 idUnicoUsuario, fechaDeRegistro));
     }
 
+    public static void showListInformation(List<Cliente> listOfClients) {
+        int counter = 1;
+        for (Cliente client : listOfClients) {
+            System.out.println("Index del Cliente es: " + counter);
+            client.showData();
+        }
+    }
+
     public boolean registrarCliente() {
-        if(nombre.equals("")||apellido.equals("")||dni<=10000000){
+        if (nombre.equals("") || apellido.equals("") || dni <= 10000000) {
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
@@ -114,36 +126,41 @@ public class Cliente {
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
     }
-    
-    public boolean actualizarCliente(){
-        if(nombre.equals("")||apellido.equals("")||dni<=10000000){
+
+    public boolean actualizarCliente() {
+        if (nombre.equals("") || apellido.equals("") || dni <= 10000000) {
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
-        String Query ="UPDATE `sistema_financiero`.`cliente` SET `nombre` = '"+nombre+"', `apellido` = '"+apellido+"', `dni` = '"+dni+"' WHERE idUnicoUsuario = '"+idUnicoUsuario+"');";
+        String Query = "UPDATE `sistema_financiero`.`cliente` SET `nombre` = '" + nombre + "', `apellido` = '" + apellido + "', `dni` = '" + dni + "' WHERE idUnicoUsuario = '" + idUnicoUsuario + "');";
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
     }
 
-    public static List<Cliente> searchListOfClients(int DNI) {
-        return searchListofClient("WHERE dni = " + DNI);
+    public static List<Cliente> searchListOfClients(int DNI, int truthvalue) {
+        return searchListofClient("WHERE dni = " + DNI, truthvalue);
     }
 
-    public static List<Cliente> searchListOfClients(String Nombre, String Apellido) {
-        return searchListofClient("WHERE nombre LIKE '" + Nombre + "' AND apellido LIKE '" + Apellido + "'");
+    public static List<Cliente> searchListOfClients(String Nombre, String Apellido, int truthvalue) {
+        return searchListofClient("WHERE nombre LIKE '" + Nombre + "' AND apellido LIKE '" + Apellido + "'", truthvalue);
     }
 
-    public static List<Cliente> searchListOfClients(String UUID) {
-        return searchListofClient("WHERE idUnicoUsuario = '" + UUID + "'");
+    public static List<Cliente> searchListOfClients(String UUID, int truthvalue) {
+        return searchListofClient("WHERE idUnicoUsuario = '" + UUID + "'", truthvalue);
     }
 
-    public static List<Cliente> searchListOfClients(LocalDateTime fecha_registro) {
-        return searchListofClient("WHERE fecha_registro = '" + Timestamp.valueOf(fecha_registro) + "'");
+    public static List<Cliente> searchListOfClients(LocalDateTime fecha_registro, int truthvalue) {
+        return searchListofClient("WHERE fecha_registro = '" + Timestamp.valueOf(fecha_registro) + "'", truthvalue);
     }
 
-    private static List<Cliente> searchListofClient(String WHERE) {
+    private static List<Cliente> searchListofClient(String WHERE, int truthvalue) {
         List<Cliente> clientes = new ArrayList<>();
+        if (truthvalue == 1) {
+            WHERE = WHERE + " AND activo=1";
+        } else if (truthvalue == 2) {
+            WHERE = WHERE + " AND activo=0";
+        }
         String query = "SELECT * FROM cliente " + WHERE;
 
         try {
@@ -223,11 +240,11 @@ public class Cliente {
     public static String solicitarUUID(String nombre, String apellido, int DNI) {
         String query = "SELECT idUnicoUsuario FROM cliente WHERE nombre = '" + nombre + "' AND apellido = '"
                 + apellido + "' AND dni = " + DNI + " AND activo = 1";
-        String UUID="";
+        String UUID = "";
         try {
             ResultSet rs = fetchData(query);
-            if(rs!=null && rs.next()){
-                UUID=rs.getString("idUnicoUsuario");
+            if (rs != null && rs.next()) {
+                UUID = rs.getString("idUnicoUsuario");
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());

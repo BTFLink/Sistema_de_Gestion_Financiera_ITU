@@ -5,6 +5,9 @@
 package poo.itu.sistema_de_gestion_financiera_itu;
 
 import static Connections.DDBBConnection.fetchData;
+import DataModification.ModCliente;
+import DataModification.ModEmail;
+import DataModification.ModTelefono;
 import Entity.Cliente;
 import Entity.Direccion;
 import Entity.Email;
@@ -122,7 +125,7 @@ public class BetaMain {
         }
         //Revision de Antecedentes (Si extiste el DNI registrado previamente
         try {
-            listOfClientes = Cliente.searchListOfClients(nclient.getDni());
+            listOfClientes = Cliente.searchListOfClients(nclient.getDni(),3);
             if (!listOfClientes.isEmpty()) {
                 System.out.println("\nSe encontraron clientes con el mismo DNI");
                 for (Cliente c : listOfClientes) {
@@ -307,9 +310,9 @@ public class BetaMain {
                 }
                 flag = Respuestas.equals("1");
             }
-            email.setPricipal(flag);
+            email.setPrincipal(flag);
         } else {
-            email.setPricipal(false);
+            email.setPrincipal(false);
         }
 
         email.setActivo(true);
@@ -376,26 +379,6 @@ public class BetaMain {
         return telefono;
     }
 
-    private static Cliente SearchCliente() {
-        int dnisearch, index;
-        boolean found = false;
-        Cliente client = null;
-        System.out.print("Ingrese el dni del cliente a modificar\n>");
-        dnisearch = scanner.nextInt();
-        for (Cliente c : listOfClientes) {
-            if (c.getDni() == dnisearch) {
-                found = true;
-                client = c;
-            }
-        }
-        if (found) {
-            System.out.println("Cliente encontrado");
-        } else {
-            System.out.println("No se encontro el cliente solicitado");
-        }
-        return client;
-    }
-
     private static void ModMenu() {
         String menu = """
                     \tMenu de Modificaciones
@@ -411,13 +394,16 @@ public class BetaMain {
             respuesta = scanner.nextLine();
             switch (respuesta) {
                 case "1":
-                    ModCliente();
+                    ModCliente.ModCliente();
                     break;
                 case "2":
+                    ModTelefono.ModTelefono();
                     break;
                 case "3":
+                    ModEmail.ModEmail();
                     break;
                 case "4":
+                    
                     break;
                 case "5":
                     break;
@@ -427,151 +413,7 @@ public class BetaMain {
         } while (!respuesta.equals("5"));
     }
 
-    private static void ModCliente() {
-        String UUID = "";
-        String respuesta;
-        System.out.println("Ingrese el ID unico del cliente (UUID)");
-        for (int I = 0; I < 3; I++) {
-            UUID = scanner.nextLine();
-            if (UUID.matches("^[0-9A-F]{45}$")) {
-                break;
-            } else if (I == 2) {
-                System.out.println("Ha fallado muchos intentos, volviendo");
-                return;
-            } else {
-                System.out.println("ID unico invalido");
-            }
-        }
-        Cliente mdcliente;
-        try {
-            mdcliente = Cliente.searchOneClient(UUID);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return;
-        }
-        mdcliente.showData();
-        String menu = """
-                    \t¿Que dato va a modificar?
-                    1) Nombre
-                    2) Apellido
-                    3) DNI
-                    4) Aplicar cambios
-                    5) Salir
-                    """;
-        int changes = 0;
-        do {
-            System.out.println(menu);
-            respuesta = scanner.nextLine();
-            switch (respuesta) {
-                case "1":
-                    System.out.print("\nNombre antiguo: " + mdcliente.getNombre() + "\nIngrese el nuevo nombre\n>");
-                    mdcliente.setNombre(scanner.nextLine());
-                    changes++;
-                    break;
-                case "2":
-                    System.out.print("\nApellido antiguo: " + mdcliente.getApellido() + "\nIngrese el nuevo apellido\n>");
-                    mdcliente.setApellido(scanner.nextLine());
-                    changes++;
-                    break;
-                case "3":
-                    System.out.print("\nDNI antiguo: " + mdcliente.getDni() + "\nIngrese el DNI apellido\n>");
-                    try {
-                        mdcliente.setDni(scanner.nextInt());
-                        scanner.nextLine();
-                        changes++;
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                    }
-                    break;
-                case "4":
-                    if (mdcliente.actualizarCliente()) {
-                        System.out.println("Se han realizado los cambios");
-                        changes = 0;
-                    } else {
-                        System.out.println("No se aplicaron los cambios");
-                    }
-                    break;
-                case "5":
-                    if (changes != 0) {
-                        System.out.println("Quedan cambios sin aplicar\n¿Desea continuar sin realizar los cambios?\n  (1) Si   (2) No");
-                        do {
-                            respuesta = scanner.nextLine();
-                            if (respuesta.equals("2")) {
-                                return;
-                            } else if (!respuesta.equals("1")) {
-                                System.out.println("Respuesta Invalida");
-                            }
-                        } while (!respuesta.equals("1"));
-                        break;
-                    }
-                    return;
-                default:
-                    System.out.println("Opcion Invalida");
-            }
-        } while (true);
-    }
-
-    private static void ModTelefono() {
-        String UUID = "";
-        String telefono ="";
-        String respuesta;
-        System.out.println("Buscar por:\n (1) ID Cliente\n (2) Telefono");
-        do {
-            respuesta = scanner.nextLine();
-            switch (respuesta) {
-                case "1":
-                    System.out.println("Ingrese el ID unico del cliente (UUID)");
-                    for (int I = 0; I < 3; I++) {
-                        UUID = scanner.nextLine();
-                        if (UUID.matches("^[0-9A-F]{45}$")) {
-                            break;
-                        } else if (I == 2) {
-                            System.out.println("Ha fallado muchos intentos, volviendo");
-                            return;
-                        } else {
-                            System.out.println("ID unico invalido");
-                        }
-                    }
-                    break;
-                case "2":
-                    System.out.println("Ingrese el telefono del cliente");
-                    for (int I = 0; I < 3; I++) {
-                        telefono = scanner.nextLine();
-                        if (telefono.matches("^[0-9]{8,10}$")) {
-                            break;
-                        } else if (I == 2) {
-                            System.out.println("Ha fallado muchos intentos, volviendo");
-                            return;
-                        } else {
-                            System.out.println("tipo de telefono invalido");
-                        }
-                    }
-                    break;
-                default:
-                    System.out.println("Respuesta invalida");
-            }
-        } while (!(respuesta.equals("1") || respuesta.equals("2")));
-
-        List<Telefono> listaTelefonos;
-        try {
-            if(respuesta.equals("1")){
-                listaTelefonos=Telefono.searchListTelefonoByUUID(UUID);
-            }else{
-                listaTelefonos=Telefono.searchListTelefonoByNumber(Long.parseLong(telefono));
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return;
-        }
-        if(listaTelefonos.isEmpty()){
-            System.out.println("No se encontraron telefonos bajo los datos indicados");
-            return;
-        }
-        for (Telefono lt : listaTelefonos) {
-            lt.showInformation();
-        }
-    }
-
+    
     private static void DelCliente() {
         int dnisearch, index;
         boolean found = false;
