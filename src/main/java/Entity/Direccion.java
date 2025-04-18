@@ -152,6 +152,28 @@ public class Direccion {
         return Respuesta.equals("OK");
     }
 
+    public void showDireccion(){
+        System.out.println(String.format("""
+                                         UUID:          %s
+                                         Calle:         %s
+                                         Numeracion:    %s
+                                         Piso:          %s
+                                         Codigo Postal: %s
+                                         Ciudad:        %s
+                                         Departamento:  %s
+                                         Provincia:     %s
+                                         Pais:          %s
+                                         """, cliente_UUID,calle,numeracion,piso,codigo_postal,ciudad,departamento,provincia,pais));
+    }
+    
+    public static void showListOfDireccion(List<Direccion> listOfDireccion) {
+        int counter=1;
+        for (Direccion direccion : listOfDireccion) {
+            System.out.println("Index de direccion: "+counter);
+            direccion.showDireccion();
+        }
+    }
+    
     public static List<Direccion> searchDireccionPorUUID(String cliente_UUID) {
         return searchDireccion("WHERE cliente_idUnicoUsuario = '" + cliente_UUID + "'");
     }

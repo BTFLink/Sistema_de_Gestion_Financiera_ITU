@@ -85,7 +85,7 @@ public class ModCliente {
 
                     break;
                 case 3:
-                    System.out.println("Ingrese el UUID del usuario");
+                    System.out.println("Ingrese el DNI del usuario");
             }
             if (TypeSearch != 2) {
                 valueToSearch = scanner.nextLine();
@@ -226,7 +226,7 @@ public class ModCliente {
                     System.out.println("Ingrese el nuevo DNI");
                     try {
                         CambioCliente.setDni(scanner.nextInt());
-                        if (CambioCliente.getDni()>3000000&&CambioCliente.getDni()<99999999) {
+                        if (String.valueOf(CambioCliente.getDni()).matches(REGEXDNI)) {
                             System.out.println("Cambio realizado");
                         }else{
                             System.out.println(INVALIDDATA+"\nCancelando cambio");
