@@ -68,7 +68,7 @@ public class ModDireccion {
                         index = scanner.nextInt();
                         scanner.nextLine();
                         if (index <= listOfDireccitions.size() && index > 0) {
-                            listOfDireccitions.set(index-1, ModDireccionP3(listOfDireccitions.get(index-1)));
+                            listOfDireccitions.set(index - 1, ModDireccionP3(listOfDireccitions.get(index - 1)));
                         } else {
                             System.out.println(INVALIDDATA);
                         }
@@ -88,8 +88,95 @@ public class ModDireccion {
         } while (true);
     }
 
-    public static Direccion ModDireccionP3(Direccion direccion){
-        return null;
+    public static Direccion ModDireccionP3(Direccion direccion) {
+        Direccion CambioDireccion = setDireccion(direccion);
+        int changes=0;
+        System.out.println("Ingrese la nueva Calle");
+        CambioDireccion.setCalle(scanner.nextLine());
+        if (CambioDireccion.getCalle().equals("")) {
+            CambioDireccion.setCalle(direccion.getCalle());
+            changes++;
+        }
+
+        System.out.println("Ingrese la nueva Numeracion");
+        CambioDireccion.setNumeracion(scanner.nextLine());
+        if (CambioDireccion.getNumeracion().equals("")) {
+            CambioDireccion.setNumeracion(direccion.getNumeracion());
+            changes++;
+        }
+
+        System.out.println("Ingrese el nuevo Piso");
+        CambioDireccion.setPiso(scanner.nextLine());
+        if (CambioDireccion.getPiso().equals("")) {
+            CambioDireccion.setPiso(direccion.getPiso());
+            changes++;
+        }
+
+        System.out.println("Ingrese el nuevo Codigo Postal ");
+        CambioDireccion.setCodigo_postal(scanner.nextLine());
+        if (CambioDireccion.getCodigo_postal().equals("")) {
+            CambioDireccion.setCodigo_postal(direccion.getCodigo_postal());
+            changes++;
+        }
+
+        System.out.println("Ingrese la nueva Ciudad");
+        CambioDireccion.setCiudad(scanner.nextLine());
+        if (CambioDireccion.getCiudad().equals("")) {
+            CambioDireccion.setCiudad(direccion.getCiudad());
+            changes++;
+        }
+
+        System.out.println("Ingrese el nuevo Departamento");
+        CambioDireccion.setDepartamento(scanner.nextLine());
+        if (CambioDireccion.getDepartamento().equals("")) {
+            CambioDireccion.setDepartamento(direccion.getDepartamento());
+            changes++;
+        }
+
+        System.out.println("Ingrese la nueva Provincia");
+        CambioDireccion.setProvincia(scanner.nextLine());
+        if (CambioDireccion.getProvincia().equals("")) {
+            CambioDireccion.setProvincia(direccion.getProvincia());
+            changes++;
+        }
+
+        System.out.println("Ingrese el nuevo Pais");
+        CambioDireccion.setPais(scanner.nextLine());
+        if (CambioDireccion.getPais().equals("")) {
+            CambioDireccion.setPais(direccion.getPais());
+            changes++;
+        }
+
+        if(changes>0){
+            try {
+                for (int i = 0; i < 3; i++) {
+                    if(CambioDireccion.actuallizarDireccion()){
+                        System.out.println("Actualizacion Completada con Exito");
+                        return CambioDireccion;
+                    }
+                }
+            } catch (Exception e) {
+            }
+            System.out.println("No se pudo completar la actualizacion");
+            return direccion;
+        }
+        System.out.println("No se detectaron cambios");
+        return direccion;
     }
-    
+
+    private static Direccion setDireccion(Direccion direccion) {
+        Direccion CambioDireccion = new Direccion();
+        CambioDireccion.setActivo(direccion.isActivo());
+        CambioDireccion.setCalle(direccion.getCalle());
+        CambioDireccion.setCiudad(direccion.getCiudad());
+        CambioDireccion.setCliente_UUID(direccion.getCliente_UUID());
+        CambioDireccion.setCodigo_postal(direccion.getCodigo_postal());
+        CambioDireccion.setDepartamento(direccion.getDepartamento());
+        CambioDireccion.setId(direccion.getId());
+        CambioDireccion.setNumeracion(direccion.getNumeracion());
+        CambioDireccion.setPais(direccion.getPais());
+        CambioDireccion.setPiso(direccion.getPiso());
+        CambioDireccion.setProvincia(direccion.getProvincia());
+        return CambioDireccion;
+    }
 }

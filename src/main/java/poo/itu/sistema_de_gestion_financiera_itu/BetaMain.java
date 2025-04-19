@@ -6,6 +6,7 @@ package poo.itu.sistema_de_gestion_financiera_itu;
 
 import static Connections.DDBBConnection.fetchData;
 import DataModification.ModCliente;
+import DataModification.ModDireccion;
 import DataModification.ModEmail;
 import DataModification.ModTelefono;
 import Entity.Cliente;
@@ -403,10 +404,10 @@ public class BetaMain {
                     ModEmail.ModEmail();
                     break;
                 case "4":
-                    
+                    ModDireccion.ModDireccion();
                     break;
                 case "5":
-                    break;
+                    return;
                 default:
                     System.out.println("Opcion Invalida");
             }

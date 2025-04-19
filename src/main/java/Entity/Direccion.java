@@ -151,7 +151,21 @@ public class Direccion {
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
     }
-
+//
+    public boolean actuallizarDireccion() {
+        if (cliente_UUID.length() != 45 || calle.equals("") || numeracion.equals("") || codigo_postal.equals("")) {
+            System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
+            return false;
+        }
+        String Query = "UPDATE `sistema_financiero`.`direcciones` SET `calle` = '"+calle
+                +"', `numeracion` = '"+numeracion+"', `piso` = '"+piso+"', `codigo_postal` = '"+codigo_postal
+                +"', `ciudad` = '"+ciudad+"', `departamento` = '"+departamento+"', `provincia` = '"+provincia
+                +"', `pais` = '"+pais+"' WHERE `cliente_idUnicoUsuario` = '"+cliente_UUID+"');";
+        String Respuesta = SendQuery(Query);
+        System.out.println("Resultado de registro: " + Respuesta);
+        return Respuesta.equals("OK");
+    }
+    
     public void showDireccion(){
         System.out.println(String.format("""
                                          UUID:          %s
