@@ -29,6 +29,8 @@ public class BetaMain {
     static List<Cliente> listOfClientes = new ArrayList<>();
     static Scanner scanner = new Scanner(System.in);
     static String LastIDUCreated;
+    private static final String INVALIDOPTION = "Opcion Invalida", INVALIDDATA = "Entrada Invalida", REGEXUUID = "^[0-9A-F]{45}$", REGEXNA = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s%_]{1,50}$", REGEXDNI = "^\\d{7,8}$";
+
 
     public static void main(String[] args) {
         //AutomaticAdd();
@@ -453,4 +455,50 @@ public class BetaMain {
         }
     }
 
+    private static void bringAllClientData(){
+        String clienteUUID = "";
+        System.out.println("Ingrese el UUID del cliente");
+        for (int i = 0; i < 3; i++) {
+            clienteUUID = scanner.nextLine();
+            if (clienteUUID.matches(REGEXUUID)) {
+                break;
+            }
+            System.out.println(INVALIDDATA);
+        }
+
+        if (!clienteUUID.matches(REGEXUUID)) {
+            System.out.println("Intentos agotados");
+            return;
+        }
+        
+        Cliente cliente = Cliente.searchOneClient(clienteUUID);
+        if(!cliente.getIdUnicoUsuario().equals(clienteUUID)){
+            System.out.println("No se encontro el cliente");
+            return;
+        }
+        List<Telefono> telefonos = Telefono.searchListTelefonoByUUID(clienteUUID);
+        List<Email> emails = Email.searchListEmailByUUID(clienteUUID);
+        List<Direccion> direcciones = Direccion.searchDireccionPorUUID(clienteUUID);
+        
+        System.out.println("Datos del Cliente");
+        cliente.showData();
+        System.out.println("-----------------------------------");
+        System.out.println("Datos de direcciones");
+        for (Direccion dir : direcciones) {
+            dir.showDireccion();
+        }
+        System.out.println("-----------------------------------");
+        System.out.println("Datos de telefonos");
+        for (Telefono tel : telefonos) {
+            tel.showInformation();
+        }
+        System.out.println("-----------------------------------");
+        System.out.println("Datos de emails");
+        for (Email email : emails) {
+            email.showInformation();
+        }
+        
+        
+    }
+    
 }

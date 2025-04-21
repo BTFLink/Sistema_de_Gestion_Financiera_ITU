@@ -5,6 +5,9 @@
 package DataModification;
 
 import Entity.Cliente;
+import static Connections.DDBBConnection.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -16,7 +19,7 @@ public class ModCliente {
 
     private static final Scanner scanner = new Scanner(System.in);
     private static String respuesta;
-    private static final String INVALIDOPTION = "Opcion Invalida", INVALIDDATA = "Entrada Invalida", REGEXUUID="^[0-9A-F]{45}$", REGEXNA="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s%_]{1,50}$", REGEXDNI="^\\d{7,8}$";
+    private static final String INVALIDOPTION = "Opcion Invalida", INVALIDDATA = "Entrada Invalida", REGEXUUID = "^[0-9A-F]{45}$", REGEXNA = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s%_]{1,50}$", REGEXDNI = "^\\d{7,8}$";
 
     public static void ModCliente() {
         int searchActivo;
@@ -205,20 +208,20 @@ public class ModCliente {
                 case "1":
                     System.out.println("Ingrese el nuevo nombre");
                     CambioCliente.setNombre(scanner.nextLine());
-                    if(CambioCliente.getNombre().matches(REGEXNA)){
+                    if (CambioCliente.getNombre().matches(REGEXNA)) {
                         System.out.println("Cambio realizado");
-                    }else{
-                        System.out.println(INVALIDDATA+"\nCancelando cambio");
+                    } else {
+                        System.out.println(INVALIDDATA + "\nCancelando cambio");
                         CambioCliente.setNombre(previousCliente.getNombre());
                     }
                     break;
                 case "2":
                     System.out.println("Ingrese el nuevo apellido");
                     CambioCliente.setApellido(scanner.nextLine());
-                    if(CambioCliente.getApellido().matches(REGEXNA)){
+                    if (CambioCliente.getApellido().matches(REGEXNA)) {
                         System.out.println("Cambio realizado");
-                    }else{
-                        System.out.println(INVALIDDATA+"\nCancelando cambio");
+                    } else {
+                        System.out.println(INVALIDDATA + "\nCancelando cambio");
                         CambioCliente.setApellido(previousCliente.getApellido());
                     }
                     break;
@@ -228,13 +231,13 @@ public class ModCliente {
                         CambioCliente.setDni(scanner.nextInt());
                         if (String.valueOf(CambioCliente.getDni()).matches(REGEXDNI)) {
                             System.out.println("Cambio realizado");
-                        }else{
-                            System.out.println(INVALIDDATA+"\nCancelando cambio");
+                        } else {
+                            System.out.println(INVALIDDATA + "\nCancelando cambio");
                             CambioCliente.setDni(previousCliente.getDni());
                         }
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
-                        System.out.println(INVALIDDATA+"\nCancelando cambio");
+                        System.out.println(INVALIDDATA + "\nCancelando cambio");
                         CambioCliente.setDni(previousCliente.getDni());
                     }
                     break;
@@ -274,4 +277,48 @@ public class ModCliente {
         cliente2.setId(cliente.getId());
         return cliente2;
     }
+
+    public static void deleteCliente() {
+        String clienteUUID = "";
+        System.out.println("Ingrese el UUID del cliente");
+        for (int i = 0; i < 3; i++) {
+            clienteUUID = scanner.nextLine();
+            if (clienteUUID.matches(REGEXUUID)) {
+                break;
+            }
+            System.out.println(INVALIDDATA);
+        }
+
+        if (!clienteUUID.matches(REGEXUUID)) {
+            System.out.println("Intentos agotados");
+            return;
+        }
+
+        List<String> tablas = Arrays.asList("cliente", "direcciones", "telefono", "email");
+        List<String> campos = Arrays.asList("idUnicoUsuario", "cliente_idUnicoUsuario", "cliente_idUnicoUsuario", "cliente_idUnicoUsuario");
+
+        List<String> tablasANegar = buscarTablasConValor(clienteUUID, tablas, campos);
+        
+        if(tablasANegar.isEmpty()){
+            System.out.println("No se encontraron datos para eliminar");
+            return;
+        }
+        List<String> queries = new ArrayList<>();
+        
+        queries.add("UPDATE `sistema_financiero`.`cliente` SET `activo` = '0' WHERE `idUnicoUsuario` = '"+clienteUUID+"';");
+        if(tablasANegar.contains("direcciones")){
+            queries.add("UPDATE `sistema_financiero`.`direcciones` SET `activo` = '0' WHERE `cliente_idUnicoUsuario` = '"+clienteUUID+"';");
+        }
+        if(tablasANegar.contains("email")){
+            queries.add("UPDATE `sistema_financiero`.`email` SET `activo` = '0' WHERE `cliente_idUnicoUsuario` = '"+clienteUUID+"';");
+        }
+        if(tablasANegar.contains("telefono")){
+            queries.add("UPDATE `sistema_financiero`.`telefono` SET `activo` = '0' WHERE `cliente_idUnicoUsuario` = '"+clienteUUID+"';");
+        }
+        
+        System.out.println(ejecutarTransaccion(queries));
+        //System.out.println("Resultado de Actualizacion: " + Respuesta);
+        
+    }
+
 }
