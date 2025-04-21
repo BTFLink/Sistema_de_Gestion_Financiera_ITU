@@ -31,17 +31,17 @@ public class BetaMain {
     static String LastIDUCreated;
     private static final String INVALIDOPTION = "Opcion Invalida", INVALIDDATA = "Entrada Invalida", REGEXUUID = "^[0-9A-F]{45}$", REGEXNA = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s%_]{1,50}$", REGEXDNI = "^\\d{7,8}$";
 
-
     public static void main(String[] args) {
         //AutomaticAdd();
         getLIDUC();
         String menu = """
-                      \tMenú
-                      1) Añadir Cliente
-                      2) Modificar Cliente
-                      3) Eliminar Cliente
-                      4) HALLO :D
-                      5) Salir
+                      \tMenú De Clientes
+                      1) Añadir Datos
+                      2) Modificar Datos
+                      3) Eliminar Datos
+                      4) Mostrar Datos
+                      5) HALLO :D
+                      0) Salir
                       >""";
         String decision;
         String HiAnw;
@@ -59,7 +59,7 @@ public class BetaMain {
 
             switch (decision) {
                 case "1":
-                    AddCliente();
+                    AddMenu();
                     break;
                 case "2":
                     ModMenu();
@@ -68,6 +68,8 @@ public class BetaMain {
                     DelCliente();
                     break;
                 case "4":
+                    break;
+                case "5":
                     HiAnw = switch (Hi) {
                         case 0 ->
                             "Hi! Nice to Meet ya :D";
@@ -84,7 +86,7 @@ public class BetaMain {
                     Hi++;
                     break;
 
-                case "5":
+                case "0":
                     System.out.println("Exiting...");
                     Running = false;
                     break;
@@ -128,7 +130,7 @@ public class BetaMain {
         }
         //Revision de Antecedentes (Si extiste el DNI registrado previamente
         try {
-            listOfClientes = Cliente.searchListOfClients(nclient.getDni(),3);
+            listOfClientes = Cliente.searchListOfClients(nclient.getDni(), 3);
             if (!listOfClientes.isEmpty()) {
                 System.out.println("\nSe encontraron clientes con el mismo DNI");
                 for (Cliente c : listOfClientes) {
@@ -382,6 +384,98 @@ public class BetaMain {
         return telefono;
     }
 
+    private static void AddMenu() {
+        String menu = """
+                    \tMenu de Adicciones
+                    1) Añadir Cliente
+                    2) Añadir Telefono
+                    3) Añadir Email
+                    4) Añadir Direccion
+                    0) Volver al menu anterior
+                    >""";
+        String respuesta;
+        String UUID;
+        do {
+            System.out.println(menu);
+            respuesta = scanner.nextLine();
+            switch (respuesta) {
+                case "1":
+                    AddCliente();
+                    break;
+                case "2":
+                    System.out.println("Inserte el UUID del cliente al que agregara el telefono");
+                    UUID = EnterUUID();
+                    if (UUID.equals("")) {
+                        break;
+                    }
+                    Telefono telefono = addTelefono(false);
+                    telefono.setcliente_UUID(UUID);
+                    try {
+                        for (int i = 0; i < 3; i++) {
+                            if (telefono.registrarTelefono()) {
+                                System.out.println("Completado");
+                                break;
+                            }
+                            System.out.println("Reintentando");
+                        }
+
+                    } catch (Exception e) {
+                        System.out.println("Hubo un error al intentar el registro de datos");
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "3":
+                    System.out.println("Inserte el UUID del cliente al que agregara el Email");
+                    UUID = EnterUUID();
+                    if (UUID.equals("")) {
+                        break;
+                    }
+                    Email email = addEmail(false);
+                    email.setCliente_UUID(UUID);
+                    try {
+                        for (int i = 0; i < 3; i++) {
+                            if (email.registrarEmail()) {
+                                System.out.println("Completado");
+                                break;
+                            }
+                            System.out.println("Reintentando");
+                        }
+
+                    } catch (Exception e) {
+                        System.out.println("Hubo un error al intentar el registro de datos");
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "4":
+                    System.out.println("Inserte el UUID del cliente al que agregara el telefono");
+                    UUID = EnterUUID();
+                    if (UUID.equals("")) {
+                        break;
+                    }
+                    Direccion direccion = addDireccion();
+                    direccion.setCliente_UUID(UUID);
+                    try {
+                        for (int i = 0; i < 3; i++) {
+                            if (direccion.registrarDireccion()) {
+                                System.out.println("Completado");
+                                break;
+                            }
+                            System.out.println("Reintentando");
+                        }
+
+                    } catch (Exception e) {
+                        System.out.println("Hubo un error al intentar el registro de datos");
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case "0":
+                    return;
+                default:
+                    System.out.println(INVALIDOPTION);
+            }
+        } while (true);
+    }
+
     private static void ModMenu() {
         String menu = """
                     \tMenu de Modificaciones
@@ -416,23 +510,34 @@ public class BetaMain {
         } while (!respuesta.equals("5"));
     }
 
-    
     private static void DelCliente() {
-        int dnisearch, index;
-        boolean found = false;
-        System.out.print("Ingrese el dni del cliente a eliminar\n>");
-        dnisearch = scanner.nextInt();
-        for (Cliente c : listOfClientes) {
-            if (c.getDni() == dnisearch) {
-                found = true;
-                index = listOfClientes.indexOf(c);
+        String menu = """
+                      \tMenu de Eliminacion
+                      1) Eliminar Cliente
+                      2) Eliminar Telefono
+                      3) Eliminar Email
+                      4) Eliminar Direccion
+                      0) Volver al menu anterior
+                      """;
+        String respuesta,UUID;
+        do {
+            respuesta=scanner.nextLine();
+            switch (respuesta) {
+                case "1":
+                    ModCliente.deleteCliente();
+                    break;
+                case "2":
+                    break;
+                case "3":
+                    break;
+                case "4":
+                    break;
+                case "0":
+                    return;
+                default:
+                    throw new AssertionError();
             }
-        }
-        if (found) {
-            System.out.println("Cliente encontrado");
-        } else {
-            System.out.println("No se encontro el cliente solicitado");
-        }
+        } while (true);
     }
 
     private static void searchListOfClientsS(String WHERE) {
@@ -455,31 +560,18 @@ public class BetaMain {
         }
     }
 
-    private static void bringAllClientData(){
-        String clienteUUID = "";
-        System.out.println("Ingrese el UUID del cliente");
-        for (int i = 0; i < 3; i++) {
-            clienteUUID = scanner.nextLine();
-            if (clienteUUID.matches(REGEXUUID)) {
-                break;
-            }
-            System.out.println(INVALIDDATA);
-        }
+    private static void bringAllClientData() {
+        String clienteUUID = EnterUUID();
 
-        if (!clienteUUID.matches(REGEXUUID)) {
-            System.out.println("Intentos agotados");
-            return;
-        }
-        
         Cliente cliente = Cliente.searchOneClient(clienteUUID);
-        if(!cliente.getIdUnicoUsuario().equals(clienteUUID)){
+        if (!cliente.getIdUnicoUsuario().equals(clienteUUID)) {
             System.out.println("No se encontro el cliente");
             return;
         }
         List<Telefono> telefonos = Telefono.searchListTelefonoByUUID(clienteUUID);
         List<Email> emails = Email.searchListEmailByUUID(clienteUUID);
         List<Direccion> direcciones = Direccion.searchDireccionPorUUID(clienteUUID);
-        
+
         System.out.println("Datos del Cliente");
         cliente.showData();
         System.out.println("-----------------------------------");
@@ -497,8 +589,24 @@ public class BetaMain {
         for (Email email : emails) {
             email.showInformation();
         }
-        
-        
+
     }
-    
+
+    private static String EnterUUID() {
+        String UUID = "";
+        System.out.println("Ingrese el UUID del cliente");
+        for (int i = 0; i < 3; i++) {
+            UUID = scanner.nextLine();
+            if (UUID.matches(REGEXUUID)) {
+                break;
+            }
+            System.out.println(INVALIDDATA);
+        }
+
+        if (!UUID.matches(REGEXUUID)) {
+            System.out.println("Intentos agotados");
+            UUID = "";
+        }
+        return UUID;
+    }
 }
