@@ -85,7 +85,7 @@ public abstract class ModTelefono {
                      (2) Mostrar lista
                      (3) Salir
                     >""";
-        Telefono.showListInformation(listaTelefonos);
+        Telefono.showIndexedListInformation(listaTelefonos);
         do {
             System.out.print(menu);
             respuesta = scanner.nextLine();
@@ -105,7 +105,7 @@ public abstract class ModTelefono {
                     }
                     break;
                 case "2":
-                    Telefono.showListInformation(listaTelefonos);
+                    Telefono.showIndexedListInformation(listaTelefonos);
                     break;
                 case "3":
                     return;

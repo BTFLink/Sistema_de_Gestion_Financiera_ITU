@@ -84,7 +84,7 @@ public class ModEmail {
                      (2) Mostrar lista
                      (3) Salir
                     >""";
-        Email.showListInformation(listaEmails);
+        Email.showIndexedListInformation(listaEmails);
         do {
             System.out.print(menu);
             respuesta = scanner.nextLine();
@@ -104,7 +104,7 @@ public class ModEmail {
                     }
                     break;
                 case "2":
-                    Email.showListInformation(listaEmails);
+                    Email.showIndexedListInformation(listaEmails);
                     break;
                 case "3":
                     return;

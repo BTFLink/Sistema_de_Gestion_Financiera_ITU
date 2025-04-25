@@ -69,10 +69,16 @@ public class Email {
         System.out.println(String.format("Email: %s\nPrincipal: %s\nActivo: %s\nCodigo del dueño: %s", email, principal, activo, cliente_UUID));
     }
     
-    public static void showListInformation(List<Email> le){
+    public static void showIndexedListInformation(List<Email> le){
         int counter=1;
         for (Email email : le) {
             System.out.println("Index del email: "+counter);
+            email.showInformation();
+        }
+    }
+    
+    public static void showListInformation(List<Email> le){
+        for (Email email : le) {
             email.showInformation();
         }
     }

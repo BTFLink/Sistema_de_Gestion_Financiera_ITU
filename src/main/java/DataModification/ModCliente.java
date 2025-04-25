@@ -162,7 +162,7 @@ public class ModCliente {
                     (3) Salir
                     """;
         int index;
-        Cliente.showListInformation(listOfClients);
+        Cliente.showIndexedListInformation(listOfClients);
         do {
             System.out.println(menu);
             respuesta = scanner.nextLine();
@@ -182,7 +182,7 @@ public class ModCliente {
                     }
                     break;
                 case "2":
-                    Cliente.showListInformation(listOfClients);
+                    Cliente.showIndexedListInformation(listOfClients);
                     break;
                 case "3":
                     return;
@@ -195,7 +195,7 @@ public class ModCliente {
     private static Cliente ModClienteP4(Cliente previousCliente) {
         Cliente CambioCliente = SetCCliente(previousCliente);
         do {
-            CambioCliente.showData();
+            CambioCliente.showInformation();
             System.out.println("""
                                ¿Que va a cambiar?
                                (1) Nombre

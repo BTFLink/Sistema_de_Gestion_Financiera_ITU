@@ -98,7 +98,7 @@ public class Cliente {
         this.id = id;
     }
 
-    public void showData() {
+    public void showInformation() {
         System.out.println(String.format("""
                                          Nombre Completo: %s
                                          DNI: %d
@@ -109,11 +109,17 @@ public class Cliente {
                 idUnicoUsuario, fechaDeRegistro));
     }
 
-    public static void showListInformation(List<Cliente> listOfClients) {
+    public static void showIndexedListInformation(List<Cliente> listOfClients) {
         int counter = 1;
         for (Cliente client : listOfClients) {
             System.out.println("Index del Cliente es: " + counter);
-            client.showData();
+            client.showInformation();
+        }
+    }
+
+    public static void showListInformation(List<Cliente> listOfClients) {
+        for (Cliente client : listOfClients) {
+            client.showInformation();
         }
     }
 
@@ -139,6 +145,12 @@ public class Cliente {
         return Respuesta.equals("OK");
     }
 
+    /*
+    El "truthvalue" indica el valor de verdad en activado:
+    1 = verdadero
+    2 = falso
+    3 = no aparece el filtro
+    */
     public static List<Cliente> searchListOfClients(int DNI, int truthvalue) {
         return searchListofClient("WHERE dni = " + DNI, truthvalue);
     }

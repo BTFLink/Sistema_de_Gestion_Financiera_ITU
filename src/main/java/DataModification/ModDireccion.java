@@ -52,7 +52,7 @@ public class ModDireccion {
 
     private static void ModDireccionP2(List<Direccion> listOfDireccitions) {
         int index;
-        Direccion.showListOfDireccion(listOfDireccitions);
+        Direccion.showIndexedListInformation(listOfDireccitions);
         do {
             System.out.println("""
                                \tMenu Modificacion Direccion
@@ -78,7 +78,7 @@ public class ModDireccion {
                     }
                     break;
                 case "2":
-                    Direccion.showListOfDireccion(listOfDireccitions);
+                    Direccion.showIndexedListInformation(listOfDireccitions);
                     break;
                 case "3":
                     return;

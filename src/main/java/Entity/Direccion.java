@@ -152,21 +152,22 @@ public class Direccion {
         return Respuesta.equals("OK");
     }
 //
+
     public boolean actuallizarDireccion() {
         if (cliente_UUID.length() != 45 || calle.equals("") || numeracion.equals("") || codigo_postal.equals("")) {
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
-        String Query = "UPDATE `sistema_financiero`.`direcciones` SET `calle` = '"+calle
-                +"', `numeracion` = '"+numeracion+"', `piso` = '"+piso+"', `codigo_postal` = '"+codigo_postal
-                +"', `ciudad` = '"+ciudad+"', `departamento` = '"+departamento+"', `provincia` = '"+provincia
-                +"', `pais` = '"+pais+"' WHERE `cliente_idUnicoUsuario` = '"+cliente_UUID+"');";
+        String Query = "UPDATE `sistema_financiero`.`direcciones` SET `calle` = '" + calle
+                + "', `numeracion` = '" + numeracion + "', `piso` = '" + piso + "', `codigo_postal` = '" + codigo_postal
+                + "', `ciudad` = '" + ciudad + "', `departamento` = '" + departamento + "', `provincia` = '" + provincia
+                + "', `pais` = '" + pais + "' WHERE `cliente_idUnicoUsuario` = '" + cliente_UUID + "');";
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
     }
-    
-    public void showDireccion(){
+
+    public void showDireccion() {
         System.out.println(String.format("""
                                          UUID:          %s
                                          Calle:         %s
@@ -177,17 +178,23 @@ public class Direccion {
                                          Departamento:  %s
                                          Provincia:     %s
                                          Pais:          %s
-                                         """, cliente_UUID,calle,numeracion,piso,codigo_postal,ciudad,departamento,provincia,pais));
+                                         """, cliente_UUID, calle, numeracion, piso, codigo_postal, ciudad, departamento, provincia, pais));
     }
-    
-    public static void showListOfDireccion(List<Direccion> listOfDireccion) {
-        int counter=1;
+
+    public static void showIndexedListInformation(List<Direccion> listOfDireccion) {
+        int counter = 1;
         for (Direccion direccion : listOfDireccion) {
-            System.out.println("Index de direccion: "+counter);
+            System.out.println("Index de direccion: " + counter);
             direccion.showDireccion();
         }
     }
-    
+
+    public static void showListInformation(List<Direccion> listOfDireccion) {
+        for (Direccion direccion : listOfDireccion) {
+            direccion.showDireccion();
+        }
+    }
+
     public static List<Direccion> searchDireccionPorUUID(String cliente_UUID) {
         return searchDireccion("WHERE cliente_idUnicoUsuario = '" + cliente_UUID + "'");
     }
