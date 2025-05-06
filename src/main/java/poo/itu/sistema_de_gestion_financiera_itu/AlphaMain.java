@@ -13,15 +13,16 @@ import java.util.Scanner;
  * @author BTF
  */
 public class AlphaMain {
+
     static Scanner scanner = new Scanner(System.in);
-    static String  respuesta;
+    static String respuesta;
     private static final String UNERR = "Error Inesperado, volviendo", INVALIDOPTION = "Opcion Invalida",
             INVALIDDATA = "Entrada Invalida", REGEXUUID = "^CLI-[0-9A-Fa-f]{16}$",
             REGEXNA = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s%_]{1,50}$",
-            REGEXEMAIL = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-    
+            REGEXEMAIL = "^(?=.{1,255}$)[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+
     public static void main(String[] args) {
-        String menu="""
+        String menu = """
                     \tMenu Datos Cliente
                     1) Registrar Cliente
                     2) Modificar Cliente
@@ -29,9 +30,9 @@ public class AlphaMain {
                     4) Traer Lista de Clientes registrados
                     0) Salir
                     """;
-        do {            
+        do {
             System.out.println(menu);
-            respuesta=scanner.nextLine();
+            respuesta = scanner.nextLine();
             switch (respuesta) {
                 case "1":
                     registrarCliente();
@@ -40,7 +41,7 @@ public class AlphaMain {
                     editarCliente();
                     break;
                 case "3":
-                    Cliente.searchAClient(EnterUUID()).showClientData();
+                    Cliente.searchAClient(EnterUUID()).showClientData(false);
                     break;
                 case "4":
                     Cliente.traerTodos();
@@ -52,58 +53,65 @@ public class AlphaMain {
             }
         } while (true);
     }
-    
-    private static void registrarCliente(){
+
+    private static void registrarCliente() {
         Cliente cliente = new Cliente();
-        boolean nombre=false,direccion=false,email=false,telefono=false,compleate;
+        boolean nombre = false, direccion = false, email = false, telefono = false, compleate;
         do {
-            if(!nombre){
+            if (!nombre) {
                 System.out.println("Ingrese nombre y apellido del cliente (50 char max)");
                 cliente.setNombre(scanner.nextLine());
             }
-            
-            if(!direccion){
+
+            if (!direccion) {
                 System.out.println("Ingrese direccion del cliente");
                 cliente.setDireccion(scanner.nextLine());
             }
-            
-            if(!email){
+
+            if (!email) {
                 System.out.println("Ingrese el correo electronico del cliente");
                 cliente.setCorreoElectronico(scanner.nextLine());
             }
-            
-            if(!telefono){
+
+            if (!telefono) {
                 cliente.setTelefono(LeerLong("Ingrese el telefono del cliente"));
             }
-            
-            nombre=cliente.getNombre().matches(REGEXNA);
-            email=cliente.getCorreoElectronico().matches(REGEXEMAIL);
-            direccion=!cliente.getDireccion().equals("");
-            telefono=(cliente.getTelefono()>1000000000L &&cliente.getTelefono()<6000000000L);
-            compleate=nombre&&email&&direccion&&telefono;
-            
-            if(!compleate){
+
+            nombre = cliente.getNombre().matches(REGEXNA);
+            email = cliente.getCorreoElectronico().matches(REGEXEMAIL);
+            direccion = !cliente.getDireccion().equals("");
+            telefono = (cliente.getTelefono() > 1000000000L && cliente.getTelefono() < 6000000000L);
+            compleate = nombre && email && direccion && telefono;
+
+            if (!compleate) {
                 System.out.println("Hay uno o mas datos mal ingresados");
             }
         } while (!compleate);
-        for (int i = 0; i < 3; i++) {
-            if(cliente.registrarCliente()){
-                System.out.println("Registro Completado");
-                return;
+        try {
+            for (int i = 0; i < 3; i++) {
+                if (cliente.registrarCliente()) {
+                    System.out.println("Registro Completado");
+                    return;
+                }
             }
+        } catch (Exception e) {
+            System.out.println(UNERR);
+            System.out.println(e.getMessage());
         }
         System.out.println("El registro ha fallado");
     }
-    
-    private static void editarCliente(){
-        String UUID=EnterUUID();
-        if(UUID.equals("")){return;}
+
+    private static void editarCliente() {
+        String UUID = EnterUUID();
+        if (UUID.equals("")) {
+            return;
+        }
         Cliente cliente = Cliente.searchAClient(UUID);
-        if(cliente.getIdCliente().equals("")){
+        if (cliente.getIdCliente().equals("")) {
             System.out.println("No se encontro el cliente");
             return;
         }
-        String menu=String.format("""
+        String menu = String.format("""
                                   \tEditando al Cliente: %s
                                   1) Editar Nombre
                                   2) Editar Direccion
@@ -111,66 +119,74 @@ public class AlphaMain {
                                   4) Editar Telefono
                                   0) Salir
                                   """, cliente.getIdCliente());
-        String respuesta,newString,oldString="";
-        long newLong,oldLong=0L;
-        boolean change,valid;
+        String respuesta, newString, oldString = "";
+        long newLong, oldLong = 0L;
+        boolean change, valid;
         do {
-            change=false;
-            valid=true;
+            change = false;
+            valid = true;
             System.out.println(menu);
-            respuesta=scanner.nextLine();
+            respuesta = scanner.nextLine();
             switch (respuesta) {
                 case "1":
                     System.out.println("Ingrese nombre y apellido del cliente (50 char max)");
-                    newString=scanner.nextLine();
-                    if(!newString.equals(cliente.getNombre()) && newString.matches(REGEXNA)){
-                        oldString=cliente.getNombre();
+                    newString = scanner.nextLine();
+                    if (!newString.equals(cliente.getNombre()) && newString.matches(REGEXNA)) {
+                        oldString = cliente.getNombre();
                         cliente.setNombre(newString);
-                        change=true;
+                        change = true;
                     }
                     break;
                 case "2":
                     System.out.println("Ingrese direccion del cliente");
-                    newString=scanner.nextLine();
-                    if(!newString.equals(cliente.getDireccion()) && !newString.equals("")){
-                        oldString=cliente.getDireccion();
+                    newString = scanner.nextLine();
+                    if (!newString.equals(cliente.getDireccion()) && !newString.equals("")) {
+                        oldString = cliente.getDireccion();
                         cliente.setDireccion(newString);
-                        change=true;
+                        change = true;
                     }
                     break;
                 case "3":
                     System.out.println("Ingrese el correo electronico del cliente");
-                    newString=scanner.nextLine();
-                    if(!newString.equals(cliente.getCorreoElectronico()) && newString.matches(REGEXEMAIL)){
-                        oldString=cliente.getCorreoElectronico();
+                    newString = scanner.nextLine();
+                    if (!newString.equals(cliente.getCorreoElectronico()) && newString.matches(REGEXEMAIL)) {
+                        oldString = cliente.getCorreoElectronico();
                         cliente.setCorreoElectronico(newString);
-                        change=true;
+                        change = true;
                     }
                     break;
                 case "4":
-                    newLong=LeerLong("Ingrese el telefono del cliente");
-                    if(newLong!=cliente.getTelefono() && (newLong>1000000000L && newLong<6000000000L)){
-                        oldLong=cliente.getTelefono();
+                    newLong = LeerLong("Ingrese el telefono del cliente");
+                    if (newLong != cliente.getTelefono() && (newLong > 1000000000L && newLong < 6000000000L)) {
+                        oldLong = cliente.getTelefono();
                         cliente.setTelefono(newLong);
-                        change=true;
+                        change = true;
                     }
                     break;
                 case "0":
                     return;
                 default:
                     System.out.println(INVALIDOPTION);
-                    valid=false;
+                    valid = false;
             }
-            
-            if(change){
-                for (int i = 0; i < 3; i++) {
-                    if(cliente.actualizarCliente()){
-                        change=false;
-                        break;
+
+            if (change) {
+                try {
+                    for (int i = 0; i < 3; i++) {
+                        if (cliente.actualizarCliente()) {
+                            change = false;
+                            break;
+                        }
+                        if (i == 2) {
+                            System.out.println("No pudo actualizarse el cliente, revirtiendo cambios");
+                        }
                     }
-                    if(i==2){System.out.println("No pudo actualizarse el cliente, revirtiendo cambios");}
+                } catch (Exception e) {
+                    System.out.println(UNERR);
+                    System.out.println(e.getMessage());
+                    System.out.println("No pudo actualizarse el cliente, revirtiendo cambios");
                 }
-                if(change){
+                if (change) {
                     switch (respuesta) {
                         case "1":
                             cliente.setNombre(oldString);
@@ -186,13 +202,13 @@ public class AlphaMain {
                             break;
                     }
                 }
-            }else if(valid){
+            } else if (valid) {
                 System.out.println(INVALIDDATA);
             }
-            
+
         } while (true);
     }
-    
+
     private static String EnterUUID() {
         String UUID = "";
         System.out.println("Ingrese el UUID del cliente");
@@ -210,5 +226,5 @@ public class AlphaMain {
         }
         return UUID;
     }
-    
+
 }

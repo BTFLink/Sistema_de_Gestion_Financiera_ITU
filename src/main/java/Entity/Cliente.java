@@ -76,17 +76,38 @@ public class Cliente {
         this.telefono = telefono;
     }
 
-    public void showClientData() {
+    public void showClientData(boolean listType) {
         if (idCliente.equals("")) {
             return;
         }
-        System.out.println(String.format("""
+        String Nombre, UUID, Dir, Email, Telefono;
+        Nombre = rellenarConEspacios(this.nombre, 50);
+        UUID = rellenarConEspacios(this.idCliente, 20);
+        Dir = rellenarConEspacios(this.direccion, 100);
+        Email = rellenarConEspacios(this.correoElectronico, 255);
+        Telefono = rellenarConEspacios(String.valueOf(this.telefono), 15);
+
+        if (listType) {
+            System.out.println(String.format("%s|%s|%s|%s|%s", Nombre, UUID, Dir, Email, Telefono));
+        } else {
+            System.out.println(String.format("""
                                          Nombre:    %s
                                          UUID:      %s
                                          Direccion: %s
                                          Email:     %s
-                                         Telefono:  %d
-                                         """, nombre, idCliente, direccion, correoElectronico, telefono));
+                                         Telefono:  %s
+                                         """, Nombre, UUID, Dir, Email, Telefono));
+        }
+    }
+
+    public static String rellenarConEspacios(String valor, int longitud) {
+        if (valor == null) {
+            valor = "";
+        }
+        if (valor.length() >= longitud) {
+            return valor.substring(0, longitud);
+        }
+        return String.format("%-" + longitud + "s", valor);
     }
 
     public boolean registrarCliente() {
@@ -158,9 +179,14 @@ public class Cliente {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        System.out.println("Nombre                                            |"
+                + "UUID                |"
+                + "Direccion                                                                                           |"
+                + "Email                                                                                                                                                                                                                                                          |"
+                + "Telefono       ");
         System.out.println("--------------------------------");
         for (Cliente lC : listClientes) {
-            lC.showClientData();
+            lC.showClientData(true);
             System.out.println("--------------------------------");
         }
     }
