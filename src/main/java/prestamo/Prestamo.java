@@ -1,139 +1,98 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package prestamo;
 
-import connections.DDBBConnection;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+public abstract class Prestamo {
+    protected String idPrestamo;
+    protected double monto;
+    protected double tasaInteresAnual;
+    protected int numeroCuotas;
+    protected String tipoPrestamo;
+    protected String tipoCuota;
+    protected ArrayList<Pago> pagos;
+    protected Date fechaCreacion;
+    protected static final double PENALIDAD_POR_MORA = 0.05; // 5%
+    protected ArrayList<Double> tasasMensuales;
 
-/**
- *
- * @author Sabrina Resca
- */
-//Permitir la creación de un préstamo para un cliente específico ingresando el monto solicitado,
-// tipo de préstamo (por ejemplo, personal o hipotecario), tasa de interés y número de cuotas.
-//Generar automáticamente un número de préstamo único para el registro.
-//Registrar múltiples préstamos por cliente, visualizándolos en la consulta detallada de cada cliente.
-
-
-public  abstract class Prestamo {
-
-    private double monto;
-    private String tipoPrestamo;
-    private double tasaInteresAnual;
-    private int cuotas;
-    private String numeroPrestamo;
-    private TipoCuota tipoCuota;
-    protected double montoCuotas;
-    protected double totalADevolver;
-    private int idPrestamoBD;
-
-    public Prestamo(double monto, String tipoPrestamo, double tasaInteresAnual, int cuotas, TipoCuota tipoCuota) {
+    public Prestamo(String idPrestamo, double monto, double tasaInteresAnual, int numeroCuotas, String tipoCuota) {
+        this.idPrestamo = idPrestamo;
         this.monto = monto;
-        this.tipoPrestamo = tipoPrestamo;
-        this.tasaInteresAnual = tasaInteresAnual / 100.0;
-        this.cuotas = cuotas;
+        this.tasaInteresAnual = tasaInteresAnual;
+        this.numeroCuotas = numeroCuotas;
         this.tipoCuota = tipoCuota;
-        this.numeroPrestamo = generarNumeroPrestamoUnico();
-        calcularMontoCuotas();
-    }
-    private String generarNumeroPrestamoUnico(){
-        return "PRE-"+ System.currentTimeMillis();
-    }
-    protected abstract void calcularMontoCuotas();
-
-    public double getMonto() {
-        return monto;
+        this.pagos = new ArrayList<>();
+        this.fechaCreacion = new Date();
+        this.tasasMensuales = new ArrayList<>();
+        calcularTasasVariables();
     }
 
-    public void setMonto(double monto) {
-        this.monto = monto;
+    public double calcularTotalIntereses() {
+        double totalIntereses = 0;
+        for (int i = 1; i <= numeroCuotas; i++) {
+            totalIntereses += calcularCuota(i) - (monto / numeroCuotas);
+        }
+        return totalIntereses;
     }
 
-    public String getTipoPrestamo() {
-        return tipoPrestamo;
-    }
+    private void calcularTasasVariables() {
+        double tasaBase = tasaInteresAnual / 12; // Tasa mensual inicial
 
-    public void setTipoPrestamo(String tipoPrestamo){
-        this.tipoPrestamo = tipoPrestamo;
-    }
-
-    public double getTasaInteresAnual() {
-        return tasaInteresAnual * 100;
-    }
-
-    public int getCuotas() {
-        return cuotas;
-    }
-
-    public TipoCuota getTipoCuota() {
-        return tipoCuota;
-    }
-
-    public void setTipoCuota(TipoCuota tipoCuota) {
-        this.tipoCuota = tipoCuota;
-    }
-
-    public void setCuotas(int cuotas) {
-        this.cuotas = cuotas;
-    }
-
-    public double getMontoCuotas() {
-        return montoCuotas;
-    }
-
-    public void setMontoCuotas(double montoCuotas) {
-        this.montoCuotas = montoCuotas;
-    }
-
-    public double getTotalADevolver() {
-        return totalADevolver;
-    }
-
-    public void setTotalADevolver(double totalADevolver) {
-        this.totalADevolver = totalADevolver;
-    }
-
-    public String getNumeroPrestamo() {
-        return numeroPrestamo;
-    }
-
-    public void setNumeroPrestamo(String numeroPrestamo) {
-        this.numeroPrestamo = numeroPrestamo;
-    }
-
-    public void mostrarInfoPrestamo() {
-        System.out.println("Número de Préstamo: " + numeroPrestamo);
-        System.out.println("Tipo de Préstamo: " + tipoPrestamo);
-        System.out.println("Tipo de Cuota: " + tipoCuota);
-        System.out.println("Monto Solicitado: $" + String.format("%.2f", monto));
-        System.out.println("Tasa de Interés Anual: " + String.format("%.2f", getTasaInteresAnual()) + "%");
-        System.out.println("Cantidad de Cuotas: " + cuotas);
-        System.out.println("Monto de la Cuota: $" + String.format("%.2f", montoCuotas));
-        System.out.println("Total a Devolver: $" + String.format("%.2f", totalADevolver));
-    }
-    public double calcularSaldoPendiente(DDBBConnection conexion) {
-        try {
-            PagoCuotaDAO dao = new PagoCuotaDAO((Connection) conexion);
-            double pagado = dao.obtenerTotalPagado(this.idPrestamoBD); // Necesitás almacenar este ID desde la DB
-            return this.totalADevolver - pagado;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return this.totalADevolver;
+        for (int i = 0; i < numeroCuotas; i++) {
+            if (tipoCuota.equals("VARIABLE") && i > 0 && i % 3 == 0) {
+                // Ajuste cada 3 cuotas (ejemplo: variación entre -0.5% y +1.5%)
+                double variacion = (Math.random() * 2.0) - 0.5;
+                tasaBase += variacion;
+            }
+            tasasMensuales.add(tasaBase); // Almacenar tasa para esta cuota
         }
     }
 
-
-    public int getIdPrestamoBD() {
-        return idPrestamoBD;
+    public double calcularCuota(int numeroCuota) {
+        if (numeroCuota < 1 || numeroCuota > numeroCuotas) {
+            return 0;
+        }
+        double tasaMensual = getTasaMensual(numeroCuotas) / 100;
+        return monto * (tasaMensual * Math.pow(1 + tasaMensual, numeroCuotas))
+                / (Math.pow(1 + tasaMensual, numeroCuotas) - 1);
     }
 
-    public void setIdPrestamoBD(int idPrestamoBD) {
-        this.idPrestamoBD = idPrestamoBD;
+    public void registrarPago(int numeroCuota, double montoPagado, Date fechaPago) {
+        Pago pago = new Pago(numeroCuota, montoPagado, fechaPago);
+        pagos.add(pago);
     }
 
+    public boolean verificarMora(Date fechaPago, int numeroCuota) {
+        Calendar calPago = Calendar.getInstance();
+        calPago.setTime(fechaPago);
 
+        Calendar calVencimiento = Calendar.getInstance();
+        calVencimiento.setTime(fechaCreacion);
+        calVencimiento.add(Calendar.MONTH, numeroCuota);
+        calVencimiento.set(Calendar.DAY_OF_MONTH, 10);
+
+        return calPago.after(calVencimiento);
+    }
+
+    public double calcularPenalidad(double montoCuota) {
+        return montoCuota * PENALIDAD_POR_MORA;
+    }
+
+    public double getTasaMensual(int numeroCuota){
+        if (numeroCuotas < 1 || numeroCuota > numeroCuotas) {
+            return 0;
+        }
+        return tasasMensuales.get(numeroCuotas - 1); // Las cuotas empiezan en 1
+    }
+
+    // Getters
+    public String getIdPrestamo() { return idPrestamo; }
+    public double getMonto() { return monto; }
+    public double getTasaInteres() { return tasaInteresAnual; }
+    public int getNumeroCuotas() { return numeroCuotas; }
+    public String getTipoPrestamo() { return tipoPrestamo; }
+    public String getTipoCuota() { return tipoCuota; }
+    public ArrayList<Pago> getPagos() { return pagos; }
+    public Date getFechaCreacion() { return fechaCreacion; }
 }

@@ -1,30 +1,18 @@
 package prestamo;
 
 public class PrestamoPersonal extends Prestamo {
-
-
-    public PrestamoPersonal(double monto, double tasaInteresAnual, int cuotas,TipoCuota tipoCuota) {
-        super(monto, "Personal", tasaInteresAnual, cuotas, tipoCuota);
+    public PrestamoPersonal(String idPrestamo, double monto, double tasaInteres, int numeroCuotas, String tipoCuota) {
+        super(idPrestamo, monto, tasaInteres, numeroCuotas, tipoCuota);
+        this.tipoPrestamo = "PERSONAL";
     }
 
     @Override
-    protected void calcularMontoCuotas() {
-        double interesTotal = getMonto() * (getTasaInteresAnual() / 100.0) * ((double) getCuotas() / 12.0);
-        this.totalADevolver = getMonto() + interesTotal;
+    public double calcularCuota(int numeroCuota) {
+        // Obtener la tasa mensual ya calculada
+        double tasaMensual = getTasaMensual(numeroCuota) / 100; // Convertir a decimal
 
-        double cuotaBase = totalADevolver / getCuotas();
-        this.montoCuotas = cuotaBase;
-
-        System.out.println("Detalle de cuotas (Préstamo Personal - " + getTipoCuota() + "):");
-        for (int i = 1; i <= getCuotas(); i++) {
-            double cuota;
-            if (getTipoCuota() == TipoCuota.VARIABLE) {
-                double variacion = cuotaBase * 0.1;
-                cuota = cuotaBase + Math.sin(i) * variacion;
-            } else {
-                cuota = cuotaBase;
-            }
-            System.out.printf("Cuota %2d: $%.2f%n", i, cuota);
-        }
+        // Fórmula de amortización francesa (cuota constante)
+        return monto * (tasaMensual * Math.pow(1 + tasaMensual, numeroCuotas))
+                / (Math.pow(1 + tasaMensual, numeroCuotas) - 1);
     }
 }
