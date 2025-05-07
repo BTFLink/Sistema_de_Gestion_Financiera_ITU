@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
+import static Utils.LeerDataType.*;
 
 public class MenuInteractivo {
     private ArrayList<Prestamo> prestamos;
     private Scanner scanner;
     private int contadorPrestamos;
-    private String clienteActual;
+    private String clienteActual,INVALIDOPTION = "Opcion Invalida";
     private SimpleDateFormat dateFormat;
 
     public MenuInteractivo() {
@@ -23,20 +24,21 @@ public class MenuInteractivo {
 
     public void mostrarMenuPrincipal() {
         int opcion;
+        String menu="""
+                    \n=== SISTEMA DE PRÉSTAMOS ===
+                    1. Seleccionar cliente
+                    2. Crear nuevo préstamo
+                    3. Registrar pago
+                    4. Mostrar plan de cuotas
+                    5. Salir
+                    Seleccione una opción: """;
         do {
-            System.out.println("\n=== SISTEMA DE PRÉSTAMOS ===");
-            System.out.println("1. Seleccionar cliente");
-            System.out.println("2. Crear nuevo préstamo");
-            System.out.println("3. Registrar pago");
-            System.out.println("4. Mostrar plan de cuotas");
-            System.out.println("5. Salir");
-            System.out.print("Seleccione una opción: ");
-
-            opcion = leerOpcion();
+            
+            opcion = LeerInt(menu, 1, 5);
 
             switch (opcion) {
                 case 1:
-                    seleccionarCliente();
+                    seleccionarCliente(false);
                     break;
                 case 2:
                     crearPrestamo();
@@ -56,45 +58,76 @@ public class MenuInteractivo {
         } while (opcion != 5);
     }
 
-    private void seleccionarCliente() {
-        System.out.print("\nIngrese nombre del cliente: ");
-        clienteActual = scanner.nextLine();
+    private void seleccionarCliente(boolean desvio) {
+        System.out.print("\nIngrese UUID del cliente: ");
+        clienteActual = scanner.nextLine();//Buscar Cliente en BD //Si no lo encuentra retornar
         System.out.println("Cliente seleccionado: " + clienteActual);
+        if(desvio){return;}
         mostrarMenuCliente();
     }
 
     private void crearPrestamo() {
         if (clienteActual.isEmpty()) {
-            System.out.println("Primero seleccione un cliente.");
-            return;
+            seleccionarCliente(true);
+            if(clienteActual.isEmpty()){
+            return;}
         }
 
         System.out.println("\n=== CREAR NUEVO PRÉSTAMO ===");
         System.out.println("Cliente: " + clienteActual);
+        
+        int tipo;
+        do {
+            tipo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ",1,2);
+            if(tipo==1||tipo==2){break;}
+            System.out.println(INVALIDOPTION);
+        } while (true);
+        
+        double monto;
+        do {
+            if(tipo==1){
+                monto = LeerDouble("Monto del préstamo: ",10000,20000000);
+            }else{
+                monto = LeerDouble("Monto del préstamo: ",5000000,70000000);
+            }
+            if(monto!=Double.NaN){break;}
+            System.out.println("Monto Invalido");
+        } while (true);
+        
+        double tasa;
+        
+        do {
+            tasa= LeerDouble("Tasa de interés inicial anual (%): ",0,100);
+            if(monto!=Double.NaN){break;}
+            System.out.println("Interes Invalido");
+        } while (true);
+        
 
-        double monto = leerDouble("Monto del préstamo: ");
-        double tasa = leerDouble("Tasa de interés inicial anual (%): ");
-
-        System.out.print("Tipo de préstamo (1=Personal, 2=Hipotecario): ");
-        int tipo = leerOpcion();
-
-        System.out.print("Tipo de cuota (1=Fija, 2=Variable): ");
-        int tipoCuota = leerOpcion();
-
+        
+        int tipoCuota;
+        do {
+            tipoCuota = LeerInt("Tipo de cuota (1=Fija, 2=Variable): ",1,2);
+            if(tipoCuota==1||tipoCuota==2){break;}
+            System.out.println(INVALIDOPTION);
+        } while (true);
+        
+        //P-1-72 H-12-360
         int cuotas = leerNumeroCuotas(tipo);
-
+        
+        //Modificar y añadir a base de datos
         String id = "PR-" + contadorPrestamos++;
         Prestamo prestamo = crearTipoPrestamo(id, monto, tasa, cuotas, tipoCuota, tipo);
 
-        prestamos.add(prestamo);
+        prestamos.add(prestamo);//Enviar Prestamo a BD
         System.out.println("\nPréstamo creado exitosamente!");
         System.out.println("ID del préstamo: " + id);
     }
 
     private void registrarPago() {
         if (clienteActual.isEmpty()) {
-            System.out.println("Primero seleccione un cliente.");
-            return;
+            seleccionarCliente(true);
+            if(clienteActual.isEmpty()){
+            return;}
         }
 
         System.out.println("\n=== REGISTRAR PAGO ===");
@@ -127,8 +160,9 @@ public class MenuInteractivo {
 
     private void mostrarPlanCuotas() {
         if (clienteActual.isEmpty()) {
-            System.out.println("Primero seleccione un cliente.");
-            return;
+            seleccionarCliente(true);
+            if(clienteActual.isEmpty()){
+            return;}
         }
 
         Prestamo prestamo = seleccionarPrestamo();
@@ -207,15 +241,15 @@ public class MenuInteractivo {
 
     private void mostrarMenuCliente() {
         int opcion;
+        String menu="""
+                    \n=== MENÚ CLIENTE: " + clienteActual + " ===
+                    1. Crear nuevo préstamo
+                    2. Registrar pago
+                    3. Mostrar plan de cuotas
+                    4. Volver al menú principal
+                    Seleccione una opción: """;
         do {
-            System.out.println("\n=== MENÚ CLIENTE: " + clienteActual + " ===");
-            System.out.println("1. Crear nuevo préstamo");
-            System.out.println("2. Registrar pago");
-            System.out.println("3. Mostrar plan de cuotas");
-            System.out.println("4. Volver al menú principal");
-            System.out.print("Seleccione una opción: ");
-
-            opcion = leerOpcion();
+            opcion = LeerInt(menu, 1, 4);
 
             switch (opcion) {
                 case 1:
@@ -259,12 +293,13 @@ public class MenuInteractivo {
     private int leerNumeroCuotas(int tipo) {
         int cuotas;
         do {
-            cuotas = leerEnteroPositivo("Número de cuotas: ");
-            if (tipo == 2 && (cuotas < 36 || cuotas > 72)) {
-                System.out.println("Préstamo hipotecario debe tener entre 36 y 72 cuotas.");
-            }
-        } while (tipo == 2 && (cuotas < 36 || cuotas > 72));
-        return cuotas;
+            cuotas = LeerInt("Número de cuotas: ");
+            if (tipo == 2 && (cuotas < 12 || cuotas > 360)) {
+                System.out.println("Préstamo hipotecario debe tener entre 12 a 360 cuotas.");
+            }else if(tipo == 1 && (cuotas < 1 || cuotas > 72)){
+                System.out.println("Préstamo personal debe tener entre 1 a 72 cuotas.");
+            }else{return cuotas;}
+        } while (true);
     }
 
     private Prestamo seleccionarPrestamo() {

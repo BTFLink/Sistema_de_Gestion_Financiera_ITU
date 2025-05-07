@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package connections;
+package Connections;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,11 +10,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-
+/**
+ *
+ * @author BTF
+ */
 public abstract class DDBBConnection {
 
-    private static String DB = "localhost";
+    private static String DB = "sistema_financiero";
     private static String URL = "jdbc:mysql://localhost:3306/" + DB
             + "?zeroDateTimeBehavior=round&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static String User = "root";
@@ -45,9 +51,9 @@ public abstract class DDBBConnection {
             System.out.println("Conexion terminada");
         }
     }
-    
-    public static String SendQuery(String query){
-        String respuesta="Procesing";
+
+    public static String SendQuery(String query) {
+        String respuesta = "Procesing";
         if (QueryVerification(query)) {
             Conection = Conectar();
             PreparedStatement statement = null;
@@ -59,16 +65,17 @@ public abstract class DDBBConnection {
                 result = statement.execute();
                 logConnection("Conexión exitosa", query);
                 Disconect();
-                respuesta="OK";
+                respuesta = "OK";
 
             } catch (SQLException e) {
                 logConnection("Conexión fallida", query);
                 e.printStackTrace();
-                respuesta=e.getMessage();
+                respuesta = e.getMessage();
             }
         }
         return respuesta;
     }
+
     /*
     public static ResultSetIES9021 SendQuery(String query) {
 
@@ -97,7 +104,7 @@ public abstract class DDBBConnection {
         }
         return RSIES9021;
     }
-    */
+     */
     private static void logConnection(String title, String description) {
         String insertQuery = "INSERT INTO logs (title, description, id_user, date) VALUES (?, ?, ?, ?)";
 
@@ -173,12 +180,12 @@ public abstract class DDBBConnection {
 
     //Verifica el tipo de Query que se manda
     public static boolean QueryVerification(String query) {
-        
+
         boolean verification = false;
         String selectPattern = "SELECT .* FROM .*";
-            String insertPattern = "INSERT INTO .* VALUES .*";
-            String updatePattern = "UPDATE .* SET .* WHERE .*";
-            String deletePattern = "DELETE FROM .* WHERE .*";
+        String insertPattern = "INSERT INTO .* VALUES .*";
+        String updatePattern = "UPDATE .* SET .* WHERE .*";
+        String deletePattern = "DELETE FROM .* WHERE .*";
 
         if (query.matches(selectPattern) || query.matches(insertPattern) || query.matches(updatePattern) || query.matches(deletePattern)) {
             logConnection("Valid Connection attempt", query);
@@ -190,7 +197,7 @@ public abstract class DDBBConnection {
         return verification;
     }
 
-    //Cierra la conexion
+    //Cierra la coneccion
     public static void closeResources(Connection connection, PreparedStatement statement, ResultSet result) {
         try {
             if (result != null) {
@@ -205,6 +212,93 @@ public abstract class DDBBConnection {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String ejecutarTransaccion(List<String> queries) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            connection = Conectar();
+            connection.setAutoCommit(false); // Iniciamos la transacción
+
+            for (String query : queries) {
+                if (!QueryVerification(query)) {
+                    throw new SQLException("Query inválida: " + query);
+                }
+                statement = connection.prepareStatement(query);
+                statement.executeUpdate();
+                logConnection("Ejecutado en transacción", query);
+            }
+
+            connection.commit(); // Confirmamos si todas se ejecutaron correctamente
+            return "Transacción exitosa";
+
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback(); // Revertimos si algo falla
+                    System.out.println("Rollback realizado: " + e.getMessage());
+                }
+            } catch (SQLException rollbackError) {
+                System.out.println("Error al hacer rollback: " + rollbackError.getMessage());
+            }
+            return "Error en transacción: " + e.getMessage();
+
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.setAutoCommit(true); // Restauramos autocommit
+                    connection.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //La siguiente funcion, devuelve el nombre de las tablas en la que dicho valor aparece
+    public static List<String> buscarTablasConValor(String valor, List<String> tablas, List<String> campos) {
+        List<String> tablasConValor = new ArrayList<>();
+        Connection conexion = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        if (tablas.size() != campos.size()) {
+            System.out.println("La cantidad de tablas y campos no coincide.");
+            return tablasConValor;
+        }
+
+        try {
+            conexion = Conectar();
+
+            for (int i = 0; i < tablas.size(); i++) {
+                String tabla = tablas.get(i);
+                String campo = campos.get(i);
+
+                String query = "SELECT 1 FROM " + tabla + " WHERE " + campo + " = ? AND activo = '1' LIMIT 1";
+
+                statement = conexion.prepareStatement(query);
+                statement.setString(1, valor);
+
+                resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    tablasConValor.add(tabla);
+                }
+
+                statement.close(); // Cerramos por seguridad entre iteraciones
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources(conexion, statement, resultSet);
+        }
+
+        return tablasConValor;
     }
 
 }
