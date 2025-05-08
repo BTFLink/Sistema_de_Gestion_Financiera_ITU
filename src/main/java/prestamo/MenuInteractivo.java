@@ -116,8 +116,9 @@ public class MenuInteractivo {
         
         //Modificar y añadir a base de datos
         String id = "PR-" + contadorPrestamos++;
-        Prestamo prestamo = crearTipoPrestamo(id, monto, tasa, cuotas, tipoCuota, tipo);
-
+        Prestamo prestamo = crearTipoPrestamo("", monto, tasa, cuotas, tipoCuota, tipo);
+        
+        
         prestamos.add(prestamo);//Enviar Prestamo a BD
         System.out.println("\nPréstamo creado exitosamente!");
         System.out.println("ID del préstamo: " + id);
