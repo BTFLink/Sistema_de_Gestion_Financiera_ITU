@@ -6,6 +6,9 @@ package Utils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 /**
  *
@@ -33,6 +36,16 @@ public class ResultSetUtils {
         }
     }
 
+    public static double getDoubleSafe(ResultSet rs, String column) {
+        try {
+            Object value = rs.getObject(column);
+            return value != null ? Double.parseDouble(value.toString()) : 0.0;
+        } catch (SQLException | NumberFormatException e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+
     public static long getLongSafe(ResultSet rs, String column) {
         try {
             Object value = rs.getObject(column);
@@ -52,5 +65,23 @@ public class ResultSetUtils {
             return false;
         }
     }
-}
 
+    public static LocalDateTime getLocalDateTimeSafe(ResultSet rs, String column) {
+        try {
+            Object value = rs.getObject(column);
+            if (value instanceof Timestamp) {
+                return ((Timestamp) value).toLocalDateTime();
+            } else if (value instanceof LocalDateTime) {
+                return (LocalDateTime) value;
+            } else if (value != null) {
+                // Intentar parsear si viene como String
+                return LocalDateTime.parse(value.toString());
+            } else {
+                return null;
+            }
+        } catch (SQLException | DateTimeParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}

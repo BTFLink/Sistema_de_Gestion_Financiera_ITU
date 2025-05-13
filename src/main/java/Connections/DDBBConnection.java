@@ -20,7 +20,7 @@ import java.util.List;
  */
 public abstract class DDBBConnection {
 
-    private static String DB = "seconddatabase";
+    private static String DB = "thirddatabase";
     private static String URL = "jdbc:mysql://localhost:3306/" + DB
             + "?zeroDateTimeBehavior=round&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static String User = "root";

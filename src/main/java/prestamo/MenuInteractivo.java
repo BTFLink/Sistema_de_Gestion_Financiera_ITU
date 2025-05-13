@@ -1,17 +1,22 @@
 package prestamo;
 
+import Connections.PrestamosDAO;
+import static Connections.PrestamosDAO.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 import static Utils.LeerDataType.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class MenuInteractivo {
+
     private ArrayList<Prestamo> prestamos;
     private Scanner scanner;
     private int contadorPrestamos;
-    private String clienteActual,INVALIDOPTION = "Opcion Invalida";
+    private String clienteActual, INVALIDOPTION = "Opcion Invalida";
     private SimpleDateFormat dateFormat;
 
     public MenuInteractivo() {
@@ -24,7 +29,7 @@ public class MenuInteractivo {
 
     public void mostrarMenuPrincipal() {
         int opcion;
-        String menu="""
+        String menu = """
                     \n=== SISTEMA DE PRÉSTAMOS ===
                     1. Seleccionar cliente
                     2. Crear nuevo préstamo
@@ -33,7 +38,7 @@ public class MenuInteractivo {
                     5. Salir
                     Seleccione una opción: """;
         do {
-            
+
             opcion = LeerInt(menu, 1, 5);
 
             switch (opcion) {
@@ -62,80 +67,215 @@ public class MenuInteractivo {
         System.out.print("\nIngrese UUID del cliente: ");
         clienteActual = scanner.nextLine();//Buscar Cliente en BD //Si no lo encuentra retornar
         System.out.println("Cliente seleccionado: " + clienteActual);
-        if(desvio){return;}
+        if (desvio) {
+            return;
+        }
         mostrarMenuCliente();
     }
 
     private void crearPrestamo() {
         if (clienteActual.isEmpty()) {
             seleccionarCliente(true);
-            if(clienteActual.isEmpty()){
-            return;}
+            if (clienteActual.isEmpty()) {
+                return;
+            }
         }
 
         System.out.println("\n=== CREAR NUEVO PRÉSTAMO ===");
         System.out.println("Cliente: " + clienteActual);
-        
-        int tipo;
+
+        NewPrestamo PRESTAPAKA = new NewPrestamo();
+        int tipoPrestamo;
         do {
-            tipo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ",1,2);
-            if(tipo==1||tipo==2){break;}
+            tipoPrestamo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ", 1, 2);
+            if (tipoPrestamo == 1 || tipoPrestamo == 2) {
+                break;
+            }
             System.out.println(INVALIDOPTION);
         } while (true);
-        
+        PRESTAPAKA.setTipoPrestamo(tipoPrestamo == 1 ? "PERSONAL" : "HIPOTECARIO");
+
         double monto;
         do {
-            if(tipo==1){
-                monto = LeerDouble("Monto del préstamo: ",10000,20000000);
-            }else{
-                monto = LeerDouble("Monto del préstamo: ",5000000,70000000);
+            if (tipoPrestamo == 1) {
+                monto = LeerDouble("Monto del préstamo: ", 10000, 20000000);
+            } else {
+                monto = LeerDouble("Monto del préstamo: ", 5000000, 70000000);
             }
-            if(monto!=Double.NaN){break;}
+            if (monto != Double.NaN) {
+                break;
+            }
             System.out.println("Monto Invalido");
         } while (true);
-        
+        PRESTAPAKA.setMonto(monto);
+
         double tasa;
-        
         do {
-            tasa= LeerDouble("Tasa de interés inicial anual (%): ",0,100);
-            if(monto!=Double.NaN){break;}
+            tasa = LeerDouble("Tasa de interés inicial anual (%): ", 0, 100);
+            if (monto != Double.NaN) {
+                break;
+            }
             System.out.println("Interes Invalido");
         } while (true);
-        
+        PRESTAPAKA.setInteresInicial(tasa);
 
-        
         int tipoCuota;
         do {
-            tipoCuota = LeerInt("Tipo de cuota (1=Fija, 2=Variable): ",1,2);
-            if(tipoCuota==1||tipoCuota==2){break;}
+            tipoCuota = LeerInt("Tipo de cuota (1=Fija, 2=Variable): ", 1, 2);
+            if (tipoCuota == 1 || tipoCuota == 2) {
+                break;
+            }
             System.out.println(INVALIDOPTION);
         } while (true);
-        
+        PRESTAPAKA.setTipoCuota(tipoCuota == 1);
+
         //P-1-72 H-12-360
-        int cuotas = leerNumeroCuotas(tipo);
-        
+        int cuotas = leerNumeroCuotas(tipoPrestamo);
+        PRESTAPAKA.setNumeroCuotas(cuotas);
+
         //Modificar y añadir a base de datos
         String id = "PR-" + contadorPrestamos++;
-        Prestamo prestamo = crearTipoPrestamo("", monto, tasa, cuotas, tipoCuota, tipo);
-        
-        
-        prestamos.add(prestamo);//Enviar Prestamo a BD
-        System.out.println("\nPréstamo creado exitosamente!");
-        System.out.println("ID del préstamo: " + id);
+        NewPrestamo prestamo = new NewPrestamo(clienteActual, "", monto, tasa, cuotas, String.valueOf(tipoPrestamo), true, LocalDateTime.MIN, true);
+
+        //prestamos.add(prestamo);//Enviar Prestamo a BD
+        for (int i = 0; i < 3; i++) {
+            //if(CreatePrestamoDB(prestamo))
+            if (PrestamosDAO.CreatePrestamoDB(prestamo)) {
+                System.out.println("Prestamo registrado con exito");
+                return;
+            }
+        }
+
+        System.out.println("No se pudo registrar el prestamo, intentelo mas tarde");
+
+        //System.out.println("\nPréstamo creado exitosamente!");
+        //System.out.println("ID del préstamo: " + id);
+    }
+
+    private void registrarPago2() {
+        if (clienteActual.isEmpty()) {
+            seleccionarCliente(true);
+            if (clienteActual.isEmpty()) {
+                return;
+            }
+        }
+
+        System.out.println("\n=== REGISTRAR PAGO ===");
+        System.out.println("Cliente: " + clienteActual);
+
+        List<NewPrestamo> listPrestamo = ListaDePrestamos(clienteActual, false);
+
+        if (listPrestamo.isEmpty()) {
+            System.out.println("No se encontraron datos de prestamos de esta persona");
+            return;
+        }
+
+        System.out.println("Ingrese el numero de ID de uno de los prestamos para seleccionarlo");
+        NewPrestamo.ShowPrestamos(listPrestamo);
+        int ID;
+        do {
+            ID = LeerInt("Ingrese su seleccion", 1, listPrestamo.size());
+        } while (ID < 1 || ID > listPrestamo.size());
+
+        List<Cuota> listaCuotas = ListaDeCuotas(listPrestamo.get(ID - 1).getIdPrestamo(), false);
+
+        if (listaCuotas.isEmpty()) {
+            System.out.println("No se ha podido obtener las cuotas de este prestamo");
+            return;
+        }
+
+        LocalDateTime today = LocalDateTime.now();
+        List<Cuota> vencidas = Cuota.verificarCuotasEnMora(listaCuotas);
+        ID = 0;
+        int restantes;
+        if (!vencidas.isEmpty()) {
+            do {
+                restantes=0;
+                System.out.println("Ingrese el numero de ID de una de las cuotas para seleccionarla\nIngrese -1 para salir sin realizar pagos");
+                do {
+                    ID = LeerInt("Ingrese su seleccion", 1, vencidas.size());
+                } while (ID < -1 || ID > vencidas.size() || ID == 0);
+                if (ID == -1) {
+                    break;
+                }
+                if (!vencidas.get(ID).isPagado()) {
+                    switch (LeerInt("¿Registrar pago?\n(1) Si (2) No", 1, 2)) {
+                        case 1:
+                            vencidas.get(ID).setPagado(RegistrarPago(vencidas.get(ID)));
+                            break;
+                        case 2:
+                            System.out.println("Pago cancelado");
+                            break;
+                        default:
+                            System.out.println(INVALIDOPTION);
+                    }
+                } else {
+                    System.out.println("La cuota ya esta pagada");
+                }
+                for (Cuota vencida : vencidas) {
+                    if(!vencida.isPagado()){
+                        restantes++;
+                    }
+                }
+                if(restantes==0){System.out.println("No quedan cuotas vencidas que pagar");break;}
+            } while (true);
+            for (Cuota vencida : vencidas) {
+                if (!vencida.isPagado()) {
+                    System.out.println("Quedan cuotas en mora termine de pagarlas para registrar otros pagos");
+                    return;
+                }
+            }
+        }
+
+        do {
+            restantes=0;
+            System.out.println("Ingrese el numero de ID de una de las cuotas para seleccionarla\nIngrese -1 para salir sin realizar pagos");
+            do {
+                ID = LeerInt("Ingrese su seleccion", 1, listaCuotas.size());
+            } while (ID < -1 || ID > listaCuotas.size() || ID == 0);
+            if (ID == -1) {
+                break;
+            }
+            if (!listaCuotas.get(ID).isPagado()) {
+                switch (LeerInt("¿Registrar pago?\n(1) Si (2) No", 1, 2)) {
+                    case 1:
+                        listaCuotas.get(ID).setPagado(RegistrarPago(listaCuotas.get(ID)));
+                        break;
+                    case 2:
+                        System.out.println("Pago cancelado");
+                        break;
+                    default:
+                        System.out.println(INVALIDOPTION);
+                }
+            } else {
+                System.out.println("La cuota ya esta pagada");
+            }
+            for (Cuota cuota : listaCuotas) {
+                if(!cuota.isPagado()){
+                    restantes++;
+                }
+            }
+            if(restantes==0){System.out.println("No quedan cuotas que pagar");break;}
+        } while (true);
+        //Pago adelantado permitido
+
     }
 
     private void registrarPago() {
         if (clienteActual.isEmpty()) {
             seleccionarCliente(true);
-            if(clienteActual.isEmpty()){
-            return;}
+            if (clienteActual.isEmpty()) {
+                return;
+            }
         }
 
         System.out.println("\n=== REGISTRAR PAGO ===");
         System.out.println("Cliente: " + clienteActual);
 
         Prestamo prestamo = seleccionarPrestamo();
-        if (prestamo == null) return;
+        if (prestamo == null) {
+            return;
+        }
 
         int numCuota = leerEnteroPositivo("Número de cuota a pagar: ");
         double montoCuota = prestamo.calcularCuota(numCuota);
@@ -162,8 +302,9 @@ public class MenuInteractivo {
     private void mostrarPlanCuotas() {
         if (clienteActual.isEmpty()) {
             seleccionarCliente(true);
-            if(clienteActual.isEmpty()){
-            return;}
+            if (clienteActual.isEmpty()) {
+                return;
+            }
         }
 
         Prestamo prestamo = seleccionarPrestamo();
@@ -242,7 +383,7 @@ public class MenuInteractivo {
 
     private void mostrarMenuCliente() {
         int opcion;
-        String menu="""
+        String menu = """
                     \n=== MENÚ CLIENTE: " + clienteActual + " ===
                     1. Crear nuevo préstamo
                     2. Registrar pago
@@ -281,25 +422,17 @@ public class MenuInteractivo {
         return opcion;
     }
 
-
-    private Prestamo crearTipoPrestamo(String id, double monto, double tasa, int cuotas, int tipoCuota, int tipo) {
-        if (tipo == 1) {
-            return new PrestamoPersonal(id, monto, tasa, cuotas,
-                    tipoCuota == 1 ? "FIJA" : "VARIABLE");
-        }
-        return new PrestamoHipotecario(id, monto, tasa, cuotas,
-                tipoCuota == 1 ? "FIJA" : "VARIABLE");
-    }
-
     private int leerNumeroCuotas(int tipo) {
         int cuotas;
         do {
             cuotas = LeerInt("Número de cuotas: ");
             if (tipo == 2 && (cuotas < 12 || cuotas > 360)) {
                 System.out.println("Préstamo hipotecario debe tener entre 12 a 360 cuotas.");
-            }else if(tipo == 1 && (cuotas < 1 || cuotas > 72)){
+            } else if (tipo == 1 && (cuotas < 1 || cuotas > 72)) {
                 System.out.println("Préstamo personal debe tener entre 1 a 72 cuotas.");
-            }else{return cuotas;}
+            } else {
+                return cuotas;
+            }
         } while (true);
     }
 
@@ -310,9 +443,9 @@ public class MenuInteractivo {
         for (Prestamo p : prestamos) {
             // Asumimos que el préstamo pertenece al cliente actual
             prestamosCliente.add(p);
-            System.out.println(prestamosCliente.size() + ". ID: " + p.getIdPrestamo() +
-                    " - " + p.getTipoPrestamo() +
-                    " - $" + p.getMonto());
+            System.out.println(prestamosCliente.size() + ". ID: " + p.getIdPrestamo()
+                    + " - " + p.getTipoPrestamo()
+                    + " - $" + p.getMonto());
         }
 
         if (prestamosCliente.isEmpty()) {
