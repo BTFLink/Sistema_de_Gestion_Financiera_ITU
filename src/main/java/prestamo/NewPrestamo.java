@@ -25,7 +25,6 @@ public class NewPrestamo {
     private boolean tipoCuota;
     private LocalDateTime fechaCreacion;
     private boolean estaPagado;
-    
 
     public NewPrestamo() {
         this.idCliente = "";
@@ -243,4 +242,31 @@ public class NewPrestamo {
         } while (true);
     }
 
+    
+    //VVVVV No se como funciona esto VVVV @Bruno_Olguin
+    public double calcularTotalIntereses() {
+        double tasaMensual = getInteresInicial() / 12 / 100;
+
+        if (isTipoCuota()) {
+            return calcularCuota(tasaMensual, getNumeroCuotas(), getMonto());
+        } else {
+            int cuotasRestantes = getNumeroCuotas();
+            int mes = 1;
+            while (cuotasRestantes > 0) {
+                int cuotasEnBloque = Math.max(12, Math.min(cuotasRestantes, 3));
+                double cuota = calcularCuota(tasaMensual, cuotasEnBloque, getMonto());
+                System.out.println("Cuota para los meses " + mes + " a " + (mes + cuotasEnBloque - 1) + ": " + cuota);
+                cuotasRestantes -= cuotasEnBloque;
+                mes += cuotasEnBloque;
+                tasaMensual *= 1.03; // Incrementa la tasa de interés un 3%
+            }
+            return calcularCuota(tasaMensual, mes, getMonto());
+        }
+
+    }
+
+    private double calcularCuota(double tasaInteresMensual, int plazo, double monto) {
+        return monto * (tasaInteresMensual * Math.pow(1 + tasaInteresMensual, plazo)) / (Math.pow(1 + tasaInteresMensual, plazo) - 1);
+    }
+   
 }

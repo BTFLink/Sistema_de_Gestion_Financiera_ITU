@@ -36,6 +36,15 @@ public abstract class Prestamo {
         return totalIntereses;
     }
 
+    public double calcularCuota(int numeroCuota) {
+        if (numeroCuota < 1 || numeroCuota > numeroCuotas) {
+            return 0;
+        }
+        double tasaMensual = getTasaMensual(numeroCuotas) / 100;
+        return monto * (tasaMensual * Math.pow(1 + tasaMensual, numeroCuotas))
+                / (Math.pow(1 + tasaMensual, numeroCuotas) - 1);
+    }
+
     private void calcularTasasVariables() {
         double tasaBase = tasaInteresAnual / 12; // Tasa mensual inicial
 
@@ -49,15 +58,7 @@ public abstract class Prestamo {
         }
     }
 
-    public double calcularCuota(int numeroCuota) {
-        if (numeroCuota < 1 || numeroCuota > numeroCuotas) {
-            return 0;
-        }
-        double tasaMensual = getTasaMensual(numeroCuotas) / 100;
-        return monto * (tasaMensual * Math.pow(1 + tasaMensual, numeroCuotas))
-                / (Math.pow(1 + tasaMensual, numeroCuotas) - 1);
-    }
-
+    
     public void registrarPago(int numeroCuota, double montoPagado, Date fechaPago) {
         Pago pago = new Pago(numeroCuota, montoPagado, fechaPago);
         pagos.add(pago);

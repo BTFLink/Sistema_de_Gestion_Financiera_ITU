@@ -80,34 +80,18 @@ public class Cliente {
         if (idCliente.equals("")) {
             return;
         }
-        String Nombre, UUID, Dir, Email, Telefono;
-        Nombre = rellenarConEspacios(this.nombre, 50);
-        UUID = rellenarConEspacios(this.idCliente, 20);
-        Dir = rellenarConEspacios(this.direccion, 100);
-        Email = rellenarConEspacios(this.correoElectronico, 255);
-        Telefono = rellenarConEspacios(String.valueOf(this.telefono), 15);
-
         if (listType) {
-            System.out.println(String.format("%s|%s|%s|%s|%s", Nombre, UUID, Dir, Email, Telefono));
+            System.out.println(String.format("%-20s | %-50s | %-15s | %-100s | %-255s",
+                    this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico));
         } else {
             System.out.println(String.format("""
-                                         Nombre:    %s
                                          UUID:      %s
+                                         Nombre:    %s
+                                         Telefono:  %s
                                          Direccion: %s
                                          Email:     %s
-                                         Telefono:  %s
-                                         """, Nombre, UUID, Dir, Email, Telefono));
+                                         """, this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico));
         }
-    }
-
-    public static String rellenarConEspacios(String valor, int longitud) {
-        if (valor == null) {
-            valor = "";
-        }
-        if (valor.length() >= longitud) {
-            return valor.substring(0, longitud);
-        }
-        return String.format("%-" + longitud + "s", valor);
     }
 
     public boolean registrarCliente() {
@@ -179,15 +163,30 @@ public class Cliente {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("Nombre                                            |"
-                + "UUID                |"
-                + "Direccion                                                                                           |"
-                + "Email                                                                                                                                                                                                                                                          |"
-                + "Telefono       ");
+        System.out.println(String.format("%-20s | %-50s | %-15s | %-100s | %-255s",
+                "UUID", "Nombre", "Telefono", "Direccion", "Email"));
         System.out.println("--------------------------------");
         for (Cliente lC : listClientes) {
             lC.showClientData(true);
             System.out.println("--------------------------------");
         }
+    }
+
+    public static boolean existeCliente(String UUID) {
+        if(!UUID.matches("^CLI-[0-9A-Fa-f]{16}$")){
+            System.out.println("Identificador Invalido");
+            return false;
+        }
+        
+        String query = "SELECT EXISTS (SELECT 1 FROM usuarios WHERE email = '" + UUID + "') AS existe";
+        try {
+            ResultSet rs = fetchData(query);
+            if (rs.next()) {
+                return getBooleanSafe(rs, "existe");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

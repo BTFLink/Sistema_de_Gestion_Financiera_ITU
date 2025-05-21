@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import prestamo.Cuota;
 import prestamo.NewPrestamo;
+import prestamo.Pago;
 
 /**
  *
@@ -95,7 +96,7 @@ public class PrestamosDAO {
         if (prestamo.equals("PRE-*")) {
             WhereID = "WHERE";
         }
-        String Query = "SELECT * FROM `prestamos` " + WhereID + " estaPagado = '" + pagado + "'";
+        String Query = "SELECT * FROM `cuota` " + WhereID + " estaPagado = '" + pagado + "'";
         List<Cuota> listCuotas = new ArrayList<>();
         try {
             ResultSet rs = fetchData(Query);
@@ -103,7 +104,7 @@ public class PrestamosDAO {
                 while (rs.next()) {
                     Cuota cuota = new Cuota();
                     cuota.setIdPrestamo(getStringSafe(rs, "prestamo_idPrestamo"));
-                    cuota.setIdCuota(getStringSafe(rs, "idCuota"));
+                    cuota.setIdCuota(getStringSafe(rs, "idcuota"));
                     cuota.setMonto(getDoubleSafe(rs, "montoCuota"));
                     cuota.setInteres(getDoubleSafe(rs, "interesCuota"));
                     cuota.setVencimiento(getLocalDateTimeSafe(rs, "vencimiento"));
@@ -121,7 +122,7 @@ public class PrestamosDAO {
         if (!prestamo.equals("PRE-*")) {
             WhereID = "";
         }
-        String Query = "SELECT * FROM `prestamos` " + WhereID;
+        String Query = "SELECT * FROM `cuotas` " + WhereID;
         List<Cuota> listCuotas = new ArrayList<>();
         try {
             ResultSet rs = fetchData(Query);
@@ -129,7 +130,7 @@ public class PrestamosDAO {
                 while (rs.next()) {
                     Cuota cuota = new Cuota();
                     cuota.setIdPrestamo(getStringSafe(rs, "prestamo_idPrestamo"));
-                    cuota.setIdCuota(getStringSafe(rs, "idCuota"));
+                    cuota.setIdCuota(getStringSafe(rs, "idcuota"));
                     cuota.setMonto(getDoubleSafe(rs, "montoCuota"));
                     cuota.setInteres(getDoubleSafe(rs, "interesCuota"));
                     cuota.setVencimiento(getLocalDateTimeSafe(rs, "vencimiento"));
@@ -141,11 +142,41 @@ public class PrestamosDAO {
         }
         return listCuotas;
     }
-    
-    public static boolean RegistrarPago(Cuota cuota){
-        String Query="UPDATE `thirdbase`.`cuotas` SET `pagado` = 1 WHERE idCuota = '"+cuota.getIdCuota()+"';";
+
+    public static boolean RegistrarPago(Cuota cuota) {
+        String Query = "UPDATE `thirdbase`.`cuotas` SET `pagado` = 1 WHERE idCuota = '" + cuota.getIdCuota() + "';";
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
     }
+
+    //Seccion De Pagos
+    public static List<Pago> ListaDePagos(String idPrestamo) {
+        String WHERE = idPrestamo.equals("PRE-*") ? "" : "WHERE pr.idPrestamo = '" + idPrestamo + "';";
+        String Query = "SELECT p.* FROM pagos p "
+                + "JOIN cuotas c ON p.cuota_idCuota = c.idCuota "
+                + "JOIN prestamos pr ON pr.idPrestamo = c.prestamo_idPrestamo " + WHERE;
+        List<Pago> listaDePagos = new ArrayList<>();
+        try {
+            ResultSet rs = fetchData(Query);
+            int i=1;
+            if (rs != null) {
+                while (rs.next()) {
+                    Pago pago = new Pago();
+                    pago.setCuota_idCuota(getStringSafe(rs, "cuotas_idCuota"));
+                    pago.setIdPago(getStringSafe(rs, "idPago"));
+                    pago.setMontoPagado(getDoubleSafe(rs, "montopago"));
+                    pago.setPenalidad(getBooleanSafe(rs, "penalidad"));
+                    pago.setFechaPago(getLocalDateTimeSafe(rs, "fechapago"));
+                    pago.setNumeroCuota(i);
+                    listaDePagos.add(pago);
+                    if(!idPrestamo.equals("PRE-*")){i++;}
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return listaDePagos;
+    }
+
 }

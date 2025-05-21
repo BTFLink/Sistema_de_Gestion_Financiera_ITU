@@ -2,6 +2,7 @@ package prestamo;
 
 import Connections.PrestamosDAO;
 import static Connections.PrestamosDAO.*;
+import Entity.Cliente;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -9,6 +10,7 @@ import java.util.Date;
 import java.util.Scanner;
 import static Utils.LeerDataType.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class MenuInteractivo {
@@ -16,15 +18,14 @@ public class MenuInteractivo {
     private ArrayList<Prestamo> prestamos;
     private Scanner scanner;
     private int contadorPrestamos;
-    private String clienteActual, INVALIDOPTION = "Opcion Invalida";
-    private SimpleDateFormat dateFormat;
-
+    private String clienteActual;
+    private final String INVALIDOPTION = "Opcion Invalida";
+    
     public MenuInteractivo() {
         prestamos = new ArrayList<>();
         scanner = new Scanner(System.in);
         contadorPrestamos = 1;
         clienteActual = "";
-        dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     }
 
     public void mostrarMenuPrincipal() {
@@ -66,7 +67,14 @@ public class MenuInteractivo {
     private void seleccionarCliente(boolean desvio) {
         System.out.print("\nIngrese UUID del cliente: ");
         clienteActual = scanner.nextLine();//Buscar Cliente en BD //Si no lo encuentra retornar
-        System.out.println("Cliente seleccionado: " + clienteActual);
+        if (Cliente.existeCliente(clienteActual)) {
+            System.out.println("Cliente seleccionado: " + clienteActual);
+        } else {
+            System.out.println("No se ha encontrado el cliente");
+            clienteActual = "";
+            return;
+        }
+
         if (desvio) {
             return;
         }
@@ -74,9 +82,9 @@ public class MenuInteractivo {
     }
 
     private void crearPrestamo() {
-        if (clienteActual.isEmpty()) {
+        if (clienteActual.isEmpty() || clienteActual.isBlank()) {
             seleccionarCliente(true);
-            if (clienteActual.isEmpty()) {
+            if (clienteActual.isEmpty() || clienteActual.isBlank()) {
                 return;
             }
         }
@@ -152,119 +160,10 @@ public class MenuInteractivo {
         //System.out.println("ID del préstamo: " + id);
     }
 
-    private void registrarPago2() {
-        if (clienteActual.isEmpty()) {
-            seleccionarCliente(true);
-            if (clienteActual.isEmpty()) {
-                return;
-            }
-        }
-
-        System.out.println("\n=== REGISTRAR PAGO ===");
-        System.out.println("Cliente: " + clienteActual);
-
-        List<NewPrestamo> listPrestamo = ListaDePrestamos(clienteActual, false);
-
-        if (listPrestamo.isEmpty()) {
-            System.out.println("No se encontraron datos de prestamos de esta persona");
-            return;
-        }
-
-        System.out.println("Ingrese el numero de ID de uno de los prestamos para seleccionarlo");
-        NewPrestamo.ShowPrestamos(listPrestamo);
-        int ID;
-        do {
-            ID = LeerInt("Ingrese su seleccion", 1, listPrestamo.size());
-        } while (ID < 1 || ID > listPrestamo.size());
-
-        List<Cuota> listaCuotas = ListaDeCuotas(listPrestamo.get(ID - 1).getIdPrestamo(), false);
-
-        if (listaCuotas.isEmpty()) {
-            System.out.println("No se ha podido obtener las cuotas de este prestamo");
-            return;
-        }
-
-        LocalDateTime today = LocalDateTime.now();
-        List<Cuota> vencidas = Cuota.verificarCuotasEnMora(listaCuotas);
-        ID = 0;
-        int restantes;
-        if (!vencidas.isEmpty()) {
-            do {
-                restantes=0;
-                System.out.println("Ingrese el numero de ID de una de las cuotas para seleccionarla\nIngrese -1 para salir sin realizar pagos");
-                do {
-                    ID = LeerInt("Ingrese su seleccion", 1, vencidas.size());
-                } while (ID < -1 || ID > vencidas.size() || ID == 0);
-                if (ID == -1) {
-                    break;
-                }
-                if (!vencidas.get(ID).isPagado()) {
-                    switch (LeerInt("¿Registrar pago?\n(1) Si (2) No", 1, 2)) {
-                        case 1:
-                            vencidas.get(ID).setPagado(RegistrarPago(vencidas.get(ID)));
-                            break;
-                        case 2:
-                            System.out.println("Pago cancelado");
-                            break;
-                        default:
-                            System.out.println(INVALIDOPTION);
-                    }
-                } else {
-                    System.out.println("La cuota ya esta pagada");
-                }
-                for (Cuota vencida : vencidas) {
-                    if(!vencida.isPagado()){
-                        restantes++;
-                    }
-                }
-                if(restantes==0){System.out.println("No quedan cuotas vencidas que pagar");break;}
-            } while (true);
-            for (Cuota vencida : vencidas) {
-                if (!vencida.isPagado()) {
-                    System.out.println("Quedan cuotas en mora termine de pagarlas para registrar otros pagos");
-                    return;
-                }
-            }
-        }
-
-        do {
-            restantes=0;
-            System.out.println("Ingrese el numero de ID de una de las cuotas para seleccionarla\nIngrese -1 para salir sin realizar pagos");
-            do {
-                ID = LeerInt("Ingrese su seleccion", 1, listaCuotas.size());
-            } while (ID < -1 || ID > listaCuotas.size() || ID == 0);
-            if (ID == -1) {
-                break;
-            }
-            if (!listaCuotas.get(ID).isPagado()) {
-                switch (LeerInt("¿Registrar pago?\n(1) Si (2) No", 1, 2)) {
-                    case 1:
-                        listaCuotas.get(ID).setPagado(RegistrarPago(listaCuotas.get(ID)));
-                        break;
-                    case 2:
-                        System.out.println("Pago cancelado");
-                        break;
-                    default:
-                        System.out.println(INVALIDOPTION);
-                }
-            } else {
-                System.out.println("La cuota ya esta pagada");
-            }
-            for (Cuota cuota : listaCuotas) {
-                if(!cuota.isPagado()){
-                    restantes++;
-                }
-            }
-            if(restantes==0){System.out.println("No quedan cuotas que pagar");break;}
-        } while (true);
-        //Pago adelantado permitido
-
-    }
-
     private void registrarPago() {
-        if (clienteActual.isEmpty()) {
+        if (clienteActual == null || clienteActual.isBlank()) {
             seleccionarCliente(true);
-            if (clienteActual.isEmpty()) {
+            if (clienteActual == null || clienteActual.isBlank()) {
                 return;
             }
         }
@@ -272,30 +171,74 @@ public class MenuInteractivo {
         System.out.println("\n=== REGISTRAR PAGO ===");
         System.out.println("Cliente: " + clienteActual);
 
-        Prestamo prestamo = seleccionarPrestamo();
+        NewPrestamo prestamo = seleccionarPrestamo();
         if (prestamo == null) {
             return;
         }
 
-        int numCuota = leerEnteroPositivo("Número de cuota a pagar: ");
-        double montoCuota = prestamo.calcularCuota(numCuota);
-
-        System.out.printf("Monto a pagar: $%.2f%n", montoCuota);
-        double montoPagado = leerDouble("Monto efectivamente pagado: ");
-
-        Date fechaPago = new Date();
-        prestamo.registrarPago(numCuota, montoPagado, fechaPago);
-
-        if (prestamo.verificarMora(fechaPago, numCuota)) {
-            double penalidad = prestamo.calcularPenalidad(montoCuota);
-            System.out.printf("Pago registrado con penalidad por mora: $%.2f%n", penalidad);
-        } else {
-            System.out.println("Pago registrado exitosamente.");
+        List<Cuota> todasCuotas = ListaDeCuotas(prestamo.getIdPrestamo(), false);
+        if (todasCuotas.isEmpty()) {
+            System.out.println("No se ha podido obtener las cuotas de este préstamo");
+            return;
         }
-        System.out.println("Fecha de pago: " + dateFormat.format(fechaPago));
-        System.out.print("\n¿Desea ver el plan de cuotas actualizado? (S/N): ");
-        if (scanner.nextLine().equalsIgnoreCase("S")) {
-            mostrarPlanCuotas(prestamo);
+
+        List<Cuota> cuotasVencidas = Cuota.verificarCuotasEnMora(todasCuotas);
+
+        if (!cuotasVencidas.isEmpty()) {
+            if (!pagarCuotas(cuotasVencidas, "cuotas vencidas")) {
+                return;
+            }
+
+            // Reflejar pagos en la lista principal
+            for (Cuota vencida : cuotasVencidas) {
+                for (Cuota cuota : todasCuotas) {
+                    if (cuota.getIdCuota().equals(vencida.getIdCuota())) {
+                        cuota.setPagado(vencida.isPagado());
+                    }
+                }
+            }
+
+            // Verificar que no queden cuotas vencidas sin pagar
+            if (cuotasVencidas.stream().anyMatch(c -> !c.isPagado())) {
+                System.out.println("Quedan cuotas en mora. Termine de pagarlas para registrar otros pagos.");
+                return;
+            }
+        }
+
+        pagarCuotas(todasCuotas, "cuotas restantes");
+    }
+
+    private boolean pagarCuotas(List<Cuota> cuotas, String mensaje) {
+        while (true) {
+            long pendientes = cuotas.stream().filter(c -> !c.isPagado()).count();
+            if (pendientes == 0) {
+                System.out.println("No quedan " + mensaje + " que pagar");
+                return true;
+            }
+
+            System.out.println("Ingrese el número de ID de una de las " + mensaje + " para seleccionarla\nIngrese -1 para salir sin realizar pagos");
+            int seleccion = LeerInt("Ingrese su selección", -1, cuotas.size());
+            if (seleccion == -1) {
+                return false;
+            }
+
+            if (seleccion < 1 || seleccion > cuotas.size()) {
+                System.out.println("Selección inválida.");
+                continue;
+            }
+
+            Cuota cuota = cuotas.get(seleccion - 1);
+            if (cuota.isPagado()) {
+                System.out.println("La cuota ya está pagada");
+                continue;
+            }
+
+            int confirmar = LeerInt("¿Registrar pago?\n(1) Sí (2) No", 1, 2);
+            if (confirmar == 1) {
+                cuota.setPagado(RegistrarPago(cuota));
+            } else {
+                System.out.println("Pago cancelado");
+            }
         }
     }
 
@@ -307,73 +250,72 @@ public class MenuInteractivo {
             }
         }
 
-        Prestamo prestamo = seleccionarPrestamo();
+        NewPrestamo prestamo = seleccionarPrestamo();
         if (prestamo != null) {
             mostrarPlanCuotas(prestamo);
         }
     }
 
-    private void mostrarPlanCuotas(Prestamo prestamo) {
+    private void mostrarPlanCuotas(NewPrestamo prestamo) {
         System.out.println("\n=== PLAN DE CUOTAS ===");
         System.out.println("Cliente: " + clienteActual);
 
         // Mostrar resumen del préstamo
         System.out.println("\n=== RESUMEN DEL PRÉSTAMO ===");
         System.out.printf("Monto total: $%.2f%n", prestamo.getMonto());
-        System.out.printf("Tasa de interés anual inicial: %.2f%%%n", prestamo.getTasaInteres());
+        System.out.printf("Tasa de interés anual inicial: %.2f%%%n", prestamo.getInteresInicial());
 
         // Calcular intereses aproximados
         double totalIntereses = prestamo.calcularTotalIntereses();
         System.out.printf("Intereses totales aproximados: $%.2f%n", totalIntereses);
 
         System.out.println("Número de cuotas: " + prestamo.getNumeroCuotas());
-        System.out.println("Tipo de cuota: " + prestamo.getTipoCuota());
+        System.out.println("Tipo de cuota: " + (prestamo.isTipoCuota() ? "Fijo" : "Variable"));
 
         // Calcular monto total a devolver
         double totalAPagar = prestamo.getMonto() + totalIntereses;
         System.out.printf("\nTOTAL A DEVOLVER APROXIMADO: $%.2f (Capital: $%.2f + Intereses: $%.2f)%n",
                 totalAPagar, prestamo.getMonto(), totalIntereses);
 
+        List<Cuota> listaCuotas = ListaDeCuotas(prestamo.getIdPrestamo());
+        List<Pago> listaPagos = ListaDePagos(prestamo.getIdPrestamo());
+
+        if(listaCuotas.isEmpty()){
+            System.out.println("No es posible mostrar datos de Cuotas");
+            return;
+        }
         // Mostrar cuadro de cuotas detallado
         System.out.println("\n=== DETALLE DE CUOTAS ===");
         System.out.println("----------------------------------------------------------------------------------------");
-        System.out.println("| Cuota | Vencimiento  | Monto Cuota | Tasa Mes | Estado    | Penalidad | Fecha Pago    |");
+        System.out.printf("| %-22s | %-15s | %-12s | %-8s | %-9s | %-10s | %-15s |%n",
+                "Cuota","Vencimiento","Monto Cuota","Tasa Mes","Estado","Penalidad","Fecha Pago");
         System.out.println("----------------------------------------------------------------------------------------");
 
-        Calendar calendario = Calendar.getInstance();
-        calendario.setTime(prestamo.getFechaCreacion());
-
-        for (int i = 1; i <= prestamo.getNumeroCuotas(); i++) {
-            calendario.add(Calendar.MONTH, 1);
-            calendario.set(Calendar.DAY_OF_MONTH, 10);
-            Date vencimiento = calendario.getTime();
-
-            double montoCuota = prestamo.calcularCuota(i);
-            String estado = "Pendiente";
-            String penalidad = "-";
-            String fechaPagoStr = "-";
-
-            for (Pago pago : prestamo.getPagos()) {
-                if (pago.getNumeroCuota() == i) {
-                    estado = prestamo.verificarMora(pago.getFechaPago(), i) ? "Mora" : "Pagado";
-                    if (prestamo.verificarMora(pago.getFechaPago(), i)) {
-                        penalidad = String.format("$%.2f", prestamo.calcularPenalidad(montoCuota));
-                    }
-                    fechaPagoStr = dateFormat.format(pago.getFechaPago());
+        Pago pagoDeCuota;
+        String estado;
+        double penalidad;
+        for (Cuota cuota : listaCuotas) {
+            pagoDeCuota = new Pago(); //Nuevo Pago fechaPago=LocalDateTime.MIN;
+            for (Pago pago : listaPagos) {
+                if (pago.getCuota_idCuota().equals(cuota.getIdCuota())) {
+                    pagoDeCuota = pago;
                     break;
                 }
             }
 
-            System.out.printf("| %-5d | %-12s | $%-10.2f | %-8.2f%% | %-9s | %-9s | %-14s |%n", i,
-                    String.format("%02d/%02d/%04d",
-                            calendario.get(Calendar.DAY_OF_MONTH),
-                            calendario.get(Calendar.MONTH) + 1,
-                            calendario.get(Calendar.YEAR)),
-                    montoCuota,
-                    prestamo.getTasaMensual(i),
+            estado = pagoDeCuota.getMontoPagado() > 0 ? "Pagado" : "Sin Pagar";
+            estado = estado + ((pagoDeCuota.getFechaPago().isBefore(cuota.getVencimiento()) && !pagoDeCuota.getFechaPago().isEqual(LocalDateTime.MIN)) ? "" : " con Mora");
+
+            penalidad = estado.contains("Mora") ? (cuota.CalcularMora() - cuota.getMonto()) : 0.0;
+
+            System.out.printf("| %-22s | %-15s | $%-12.2f | %-8.2f%% | %-9s | %-10.2f | %-15s |%n",
+                    cuota.getIdCuota(),
+                    cuota.getVencimiento().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                    cuota.getMonto(),
+                    cuota.getInteres(),
                     estado,
                     penalidad,
-                    fechaPagoStr);
+                    estado.contains("Pagado") ? pagoDeCuota.getFechaPago().format(DateTimeFormatter.ISO_LOCAL_DATE) : "----/--/--");
         }
         System.out.println("----------------------------------------------------------------------------------------");
 
@@ -412,16 +354,6 @@ public class MenuInteractivo {
         } while (opcion != 4);
     }
 
-    private int leerOpcion() {
-        while (!scanner.hasNextInt()) {
-            System.out.println("Entrada inválida. Por favor ingrese un número.");
-            scanner.next();
-        }
-        int opcion = scanner.nextInt();
-        scanner.nextLine(); // Limpiar buffer
-        return opcion;
-    }
-
     private int leerNumeroCuotas(int tipo) {
         int cuotas;
         do {
@@ -436,60 +368,21 @@ public class MenuInteractivo {
         } while (true);
     }
 
-    private Prestamo seleccionarPrestamo() {
-        ArrayList<Prestamo> prestamosCliente = new ArrayList<>();
-
-        System.out.println("\nPréstamos del cliente " + clienteActual + ":");
-        for (Prestamo p : prestamos) {
-            // Asumimos que el préstamo pertenece al cliente actual
-            prestamosCliente.add(p);
-            System.out.println(prestamosCliente.size() + ". ID: " + p.getIdPrestamo()
-                    + " - " + p.getTipoPrestamo()
-                    + " - $" + p.getMonto());
-        }
-
-        if (prestamosCliente.isEmpty()) {
-            System.out.println("El cliente no tiene préstamos registrados.");
+    private NewPrestamo seleccionarPrestamo() {
+        try {
+            List<NewPrestamo> Nprestamos = ListaDePrestamos(clienteActual, false);
+            if (Nprestamos.isEmpty()) {
+                System.out.println("No se encontraron datos de préstamos de esta persona");
+                return null;
+            }
+            System.out.println("Ingrese el número de ID de uno de los préstamos para seleccionarlo");
+            NewPrestamo.ShowPrestamos(Nprestamos);
+            int seleccionPrestamo = LeerInt("Ingrese su selección", 1, Nprestamos.size()) - 1;
+            return Nprestamos.get(seleccionPrestamo);
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
-
-        System.out.print("Seleccione préstamo (número): ");
-        int seleccion = leerOpcion();
-
-        if (seleccion < 1 || seleccion > prestamosCliente.size()) {
-            System.out.println("Selección inválida.");
-            return null;
-        }
-
-        return prestamosCliente.get(seleccion - 1);
-    }
-
-    private double leerDouble(String mensaje) {
-        System.out.print(mensaje);
-        while (!scanner.hasNextDouble()) {
-            System.out.println("Entrada inválida. Por favor ingrese un número.");
-            scanner.next();
-        }
-        double valor = scanner.nextDouble();
-        scanner.nextLine(); // Limpiar buffer
-        return valor;
-    }
-
-    private int leerEnteroPositivo(String mensaje) {
-        int valor;
-        do {
-            System.out.print(mensaje);
-            while (!scanner.hasNextInt()) {
-                System.out.println("Entrada inválida. Por favor ingrese un número entero.");
-                scanner.next();
-            }
-            valor = scanner.nextInt();
-            scanner.nextLine(); // Limpiar buffer
-            if (valor <= 0) {
-                System.out.println("Por favor ingrese un número positivo.");
-            }
-        } while (valor <= 0);
-        return valor;
     }
 
     public static void main(String[] args) {

@@ -23,6 +23,12 @@ public class Cuota {
     private static final double PENALIDAD_POR_MORA = 0.05; // 5%
 
     public Cuota() {
+        this.idPrestamo = "";
+        this.idCuota = "";
+        this.monto = 0;
+        this.interes = 0;
+        this.pagado = false;
+        this.vencimiento = LocalDateTime.MIN;
     }
 
     public Cuota(String idPrestamo, String idCuota, double monto, double interes, boolean pagado, LocalDateTime vencimiento) {
@@ -129,15 +135,15 @@ public class Cuota {
 
     public String showCuotaConMora(Cuota cuota) {
         return String.format(
-                "%-25s %10.2f %10.2f %-10s %-20s %-10s",
+                "%-25s %10.2f %10.2f %-10s %-20s %-10.2f",
                 cuota.getIdCuota(),
                 cuota.getMonto(),
                 cuota.getInteres(),
                 cuota.isPagado() ? "Sí" : "No",
                 cuota.getVencimiento() != null ? cuota.getVencimiento().toString() : "null",
-                CalcularMora(cuota.getMonto()));
+                CalcularMora());
     }
-
+    
     public void showListCuotasConMora(List<Cuota> listaCuotas) {
         String encabezado = String.format(
                 "%-4s %-25s %10s %10s %-10s %-20s %-10s",
@@ -147,12 +153,12 @@ public class Cuota {
                 "Interés",
                 "Pagado",
                 "Vencimiento",
-                "Total con Mora"
+                "Contiene Mora"
         );
         System.out.println(encabezado);
         int ID = 1;
         for (Cuota cuota : listaCuotas) {
-            if (!cuota.isPagado() && cuota.getVencimiento().isAfter(LocalDateTime.now())) {
+            if (!cuota.isPagado() && cuota.getVencimiento().isBefore(LocalDateTime.now())) {
                 System.out.println(String.format("%-4s %s", ID, showCuotaConMora(cuota)));
             } else {
                 System.out.println(String.format(
@@ -165,12 +171,12 @@ public class Cuota {
                         cuota.getVencimiento() != null ? cuota.getVencimiento().toString() : "null",
                         cuota.isPagado() ? "Pagado" : "Sin Mora"));
             }
-
+            ID++;
         }
     }
 
-    public String CalcularMora(double montoOriginal) {
-        return String.valueOf(montoOriginal * PENALIDAD_POR_MORA);
+    public double CalcularMora() {
+        return getMonto() * PENALIDAD_POR_MORA;
     }
 
 }
