@@ -1,99 +1,272 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package prestamo;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import Connections.PrestamosDAO;
+import static Utils.LeerDataType.LeerDouble;
+import static Utils.LeerDataType.LeerInt;
+import java.time.LocalDateTime;
+import java.util.List;
 
-public abstract class Prestamo {
-    protected String idPrestamo;
-    protected double monto;
-    protected double tasaInteresAnual;
-    protected int numeroCuotas;
-    protected String tipoPrestamo;
-    protected String tipoCuota;
-    protected ArrayList<Pago> pagos;
-    protected Date fechaCreacion;
-    protected static final double PENALIDAD_POR_MORA = 0.05; // 5%
-    protected ArrayList<Double> tasasMensuales;
+/**
+ *
+ * @author BTF
+ */
+public class Prestamo {
 
-    public Prestamo(String idPrestamo, double monto, double tasaInteresAnual, int numeroCuotas, String tipoCuota) {
+    private String idCliente;
+    private String idPrestamo;
+    private double monto;
+    private double interesInicial;
+    private int numeroCuotas;
+    private String tipoPrestamo;
+    private boolean tipoCuota;
+    private LocalDateTime fechaCreacion;
+    private boolean estaPagado;
+
+    public Prestamo() {
+        this.idCliente = "";
+        this.idPrestamo = "";
+        this.monto = 0;
+        this.interesInicial = 0;
+        this.numeroCuotas = 0;
+        this.tipoPrestamo = "";
+        this.tipoCuota = false;
+        this.estaPagado = false;
+        this.fechaCreacion = LocalDateTime.now();
+    }
+
+    public Prestamo(String idCliente, String idPrestamo, double monto, double interesInicial, int numeroCuotas, String tipoPrestamo, boolean tipoCuota, LocalDateTime fechaCreacion, boolean estaPagado) {
+        this.idCliente = idCliente;
         this.idPrestamo = idPrestamo;
         this.monto = monto;
-        this.tasaInteresAnual = tasaInteresAnual;
+        this.interesInicial = interesInicial;
         this.numeroCuotas = numeroCuotas;
+        this.tipoPrestamo = tipoPrestamo;
         this.tipoCuota = tipoCuota;
-        this.pagos = new ArrayList<>();
-        this.fechaCreacion = new Date();
-        this.tasasMensuales = new ArrayList<>();
-        calcularTasasVariables();
+        this.fechaCreacion = fechaCreacion;
+        this.estaPagado = estaPagado;
     }
 
-    public double calcularTotalIntereses() {
-        double totalIntereses = 0;
-        for (int i = 1; i <= numeroCuotas; i++) {
-            totalIntereses += calcularCuota(i) - (monto / numeroCuotas);
+    public String getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(String idCliente) {
+        this.idCliente = idCliente;
+    }
+
+    public String getIdPrestamo() {
+        return idPrestamo;
+    }
+
+    public void setIdPrestamo(String idPrestamo) {
+        this.idPrestamo = idPrestamo;
+    }
+
+    public double getMonto() {
+        return monto;
+    }
+
+    public void setMonto(double monto) {
+        this.monto = monto;
+    }
+
+    public double getInteresInicial() {
+        return interesInicial;
+    }
+
+    public void setInteresInicial(double interesInicial) {
+        this.interesInicial = interesInicial;
+    }
+
+    public int getNumeroCuotas() {
+        return numeroCuotas;
+    }
+
+    public void setNumeroCuotas(int numeroCuotas) {
+        this.numeroCuotas = numeroCuotas;
+    }
+
+    public String getTipoPrestamo() {
+        return tipoPrestamo;
+    }
+
+    public void setTipoPrestamo(String tipoPrestamo) {
+        this.tipoPrestamo = tipoPrestamo;
+    }
+
+    public boolean isTipoCuota() {
+        return tipoCuota;
+    }
+
+    public void setTipoCuota(boolean tipoCuota) {
+        this.tipoCuota = tipoCuota;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public boolean isEstaPagado() {
+        return estaPagado;
+    }
+
+    public void setEstaPagado(boolean estaPagado) {
+        this.estaPagado = estaPagado;
+    }
+
+    public static void ShowPrestamos(List<Prestamo> Prestamos) {
+        String encabezado = String.format(
+                "%-3s | %-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
+                "ID",
+                "ID Cliente",
+                "ID Préstamo",
+                "Monto",
+                "Interés",
+                "Cuotas",
+                "Tipo Préstamo",
+                "Cuota",
+                "Fecha Creación",
+                "Estado"
+        );
+
+        System.out.println(encabezado);
+        int id = 1;
+        for (Prestamo Prestamo : Prestamos) {
+            System.out.println(String.format(
+                    "%-3s | %-22s | %-22s | %10.2f | %14.2f | %13d | %-15s | %-10s | %-20s | %-10s |",
+                    id,
+                    Prestamo.getIdCliente(),
+                    Prestamo.getIdPrestamo(),
+                    Prestamo.getMonto(),
+                    Prestamo.getInteresInicial(),
+                    Prestamo.getNumeroCuotas(),
+                    Prestamo.getTipoPrestamo(),
+                    Prestamo.isTipoCuota() ? "Fijo" : "Variable",
+                    Prestamo.getFechaCreacion() != null ? Prestamo.getFechaCreacion().toString() : "null",
+                    Prestamo.isEstaPagado() ? "Pagado" : "Pendiente"
+            ));
+            id++;
         }
-        return totalIntereses;
     }
 
-    public double calcularCuota(int numeroCuota) {
-        if (numeroCuota < 1 || numeroCuota > numeroCuotas) {
-            return 0;
+    private void CrearPrestamo(String cliente) {
+        String INVALIDOPTION = "Opcion Invalida";
+        if (cliente.isEmpty()) {
+            System.out.println("Cliente Ingresado Invalido");
+            return;
         }
-        double tasaMensual = getTasaMensual(numeroCuotas) / 100;
-        return monto * (tasaMensual * Math.pow(1 + tasaMensual, numeroCuotas))
-                / (Math.pow(1 + tasaMensual, numeroCuotas) - 1);
-    }
+        this.idCliente = cliente;
+        System.out.println("\n=== CREAR NUEVO PRÉSTAMO ===");
+        System.out.println("Cliente: " + cliente);
 
-    private void calcularTasasVariables() {
-        double tasaBase = tasaInteresAnual / 12; // Tasa mensual inicial
-
-        for (int i = 0; i < numeroCuotas; i++) {
-            if (tipoCuota.equals("VARIABLE") && i > 0 && i % 3 == 0) {
-                // Ajuste cada 3 cuotas (ejemplo: variación entre -0.5% y +1.5%)
-                double variacion = (Math.random() * 2.0) - 0.5;
-                tasaBase += variacion;
+        int prestamoTipo;
+        do {
+            prestamoTipo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ", 1, 2);
+            if (prestamoTipo == 1 || prestamoTipo == 2) {
+                break;
             }
-            tasasMensuales.add(tasaBase); // Almacenar tasa para esta cuota
+            System.out.println(INVALIDOPTION);
+        } while (true);
+        this.tipoPrestamo = prestamoTipo == 1 ? "PERSONAL" : "HIPOTECARIO";
+
+        do {
+            if (prestamoTipo == 1) {
+                this.monto = LeerDouble("Monto del préstamo: ", 10000, 20000000);
+            } else {
+                this.monto = LeerDouble("Monto del préstamo: ", 5000000, 70000000);
+            }
+            if (this.monto != Double.NaN) {
+                break;
+            }
+            System.out.println("Monto Invalido");
+        } while (true);
+
+        do {
+            this.interesInicial = LeerDouble("Tasa de interés inicial anual (%): ", 0, 100);
+            if (this.interesInicial != Double.NaN) {
+                break;
+            }
+            System.out.println("Interes Invalido");
+        } while (true);
+
+        int cuotaFija;
+        do {
+            cuotaFija = LeerInt("Tipo de cuota (1=Fija, 2=Variable): ", 1, 2);
+            if (cuotaFija == 1 || cuotaFija == 2) {
+                break;
+            }
+            System.out.println(INVALIDOPTION);
+        } while (true);
+        this.setTipoCuota(cuotaFija == 1);
+
+        //P-1-72 H-12-360
+        this.numeroCuotas = leerNumeroCuotas(prestamoTipo);
+
+        this.fechaCreacion = LocalDateTime.now();
+        this.idPrestamo = "";
+        this.estaPagado = false;
+        //prestamos.add(prestamo);//Enviar Prestamo a BD
+        for (int i = 0; i < 3; i++) {
+            //if(CreatePrestamoDB(prestamo))
+            if (PrestamosDAO.CreatePrestamoDB(this)) {
+                System.out.println("Prestamo registrado con exito");
+                return;
+            }
         }
+
+        System.out.println("No se pudo registrar el prestamo, intentelo mas tarde");
+
+        //System.out.println("\nPréstamo creado exitosamente!");
+        //System.out.println("ID del préstamo: " + id);
+    }
+
+    private int leerNumeroCuotas(int tipo) {
+        int cuotas;
+        do {
+            cuotas = LeerInt("Número de cuotas: ");
+            if (tipo == 2 && (cuotas < 12 || cuotas > 360)) {
+                System.out.println("Préstamo hipotecario debe tener entre 12 a 360 cuotas.");
+            } else if (tipo == 1 && (cuotas < 1 || cuotas > 72)) {
+                System.out.println("Préstamo personal debe tener entre 1 a 72 cuotas.");
+            } else {
+                return cuotas;
+            }
+        } while (true);
     }
 
     
-    public void registrarPago(int numeroCuota, double montoPagado, Date fechaPago) {
-        Pago pago = new Pago(numeroCuota, montoPagado, fechaPago);
-        pagos.add(pago);
-    }
+    //VVVVV No se como funciona esto VVVV @Bruno_Olguin
+    public double calcularTotalIntereses() {
+        double tasaMensual = getInteresInicial() / 12 / 100;
 
-    public boolean verificarMora(Date fechaPago, int numeroCuota) {
-        Calendar calPago = Calendar.getInstance();
-        calPago.setTime(fechaPago);
-
-        Calendar calVencimiento = Calendar.getInstance();
-        calVencimiento.setTime(fechaCreacion);
-        calVencimiento.add(Calendar.MONTH, numeroCuota);
-        calVencimiento.set(Calendar.DAY_OF_MONTH, 10);
-
-        return calPago.after(calVencimiento);
-    }
-
-    public double calcularPenalidad(double montoCuota) {
-        return montoCuota * PENALIDAD_POR_MORA;
-    }
-
-    public double getTasaMensual(int numeroCuota){
-        if (numeroCuotas < 1 || numeroCuota > numeroCuotas) {
-            return 0;
+        if (isTipoCuota()) {
+            return calcularCuota(tasaMensual, getNumeroCuotas(), getMonto());
+        } else {
+            int cuotasRestantes = getNumeroCuotas();
+            int mes = 1;
+            while (cuotasRestantes > 0) {
+                int cuotasEnBloque = Math.max(12, Math.min(cuotasRestantes, 3));
+                double cuota = calcularCuota(tasaMensual, cuotasEnBloque, getMonto());
+                System.out.println("Cuota para los meses " + mes + " a " + (mes + cuotasEnBloque - 1) + ": " + cuota);
+                cuotasRestantes -= cuotasEnBloque;
+                mes += cuotasEnBloque;
+                tasaMensual *= 1.03; // Incrementa la tasa de interés un 3%
+            }
+            return calcularCuota(tasaMensual, mes, getMonto());
         }
-        return tasasMensuales.get(numeroCuotas - 1); // Las cuotas empiezan en 1
+
     }
 
-    // Getters
-    public String getIdPrestamo() { return idPrestamo; }
-    public double getMonto() { return monto; }
-    public double getTasaInteres() { return tasaInteresAnual; }
-    public int getNumeroCuotas() { return numeroCuotas; }
-    public String getTipoPrestamo() { return tipoPrestamo; }
-    public String getTipoCuota() { return tipoCuota; }
-    public ArrayList<Pago> getPagos() { return pagos; }
-    public Date getFechaCreacion() { return fechaCreacion; }
+    private double calcularCuota(double tasaInteresMensual, int plazo, double monto) {
+        return monto * (tasaInteresMensual * Math.pow(1 + tasaInteresMensual, plazo)) / (Math.pow(1 + tasaInteresMensual, plazo) - 1);
+    }
+   
 }

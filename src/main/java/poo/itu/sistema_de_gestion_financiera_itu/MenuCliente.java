@@ -12,7 +12,7 @@ import java.util.Scanner;
  *
  * @author BTF
  */
-public class AlphaMain {
+public class MenuCliente {
 
     static Scanner scanner = new Scanner(System.in);
     static String respuesta;
@@ -21,7 +21,7 @@ public class AlphaMain {
             REGEXNA = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s%_]{1,50}$",
             REGEXEMAIL = "^(?=.{1,255}$)[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
-    public static void main(String[] args) {
+    public static void main() {
         String menu = """
                     \tMenu Datos Cliente
                     1) Registrar Cliente

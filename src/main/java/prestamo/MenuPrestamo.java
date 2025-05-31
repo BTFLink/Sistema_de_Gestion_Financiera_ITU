@@ -3,29 +3,23 @@ package prestamo;
 import Connections.PrestamosDAO;
 import static Connections.PrestamosDAO.*;
 import Entity.Cliente;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Scanner;
 import static Utils.LeerDataType.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class MenuInteractivo {
+public class MenuPrestamo {
 
-    private ArrayList<Prestamo> prestamos;
-    private Scanner scanner;
-    private int contadorPrestamos;
+    private final Scanner scanner;
     private String clienteActual;
     private final String INVALIDOPTION = "Opcion Invalida";
-    
-    public MenuInteractivo() {
-        prestamos = new ArrayList<>();
+    private boolean volverAPrincipal;
+
+    public MenuPrestamo() {
         scanner = new Scanner(System.in);
-        contadorPrestamos = 1;
         clienteActual = "";
+        volverAPrincipal=true;
     }
 
     public void mostrarMenuPrincipal() {
@@ -39,9 +33,7 @@ public class MenuInteractivo {
                     5. Salir
                     Seleccione una opción: """;
         do {
-
             opcion = LeerInt(menu, 1, 5);
-
             switch (opcion) {
                 case 1:
                     seleccionarCliente(false);
@@ -67,6 +59,7 @@ public class MenuInteractivo {
     private void seleccionarCliente(boolean desvio) {
         System.out.print("\nIngrese UUID del cliente: ");
         clienteActual = scanner.nextLine();//Buscar Cliente en BD //Si no lo encuentra retornar
+        
         if (Cliente.existeCliente(clienteActual)) {
             System.out.println("Cliente seleccionado: " + clienteActual);
         } else {
@@ -78,10 +71,12 @@ public class MenuInteractivo {
         if (desvio) {
             return;
         }
+        volverAPrincipal=false;
         mostrarMenuCliente();
     }
 
     private void crearPrestamo() {
+        
         if (clienteActual.isEmpty() || clienteActual.isBlank()) {
             seleccionarCliente(true);
             if (clienteActual.isEmpty() || clienteActual.isBlank()) {
@@ -92,7 +87,8 @@ public class MenuInteractivo {
         System.out.println("\n=== CREAR NUEVO PRÉSTAMO ===");
         System.out.println("Cliente: " + clienteActual);
 
-        NewPrestamo PRESTAPAKA = new NewPrestamo();
+        Prestamo PRESTAPAKA = new Prestamo();
+        PRESTAPAKA.setIdCliente(clienteActual);
         int tipoPrestamo;
         do {
             tipoPrestamo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ", 1, 2);
@@ -142,18 +138,18 @@ public class MenuInteractivo {
         PRESTAPAKA.setNumeroCuotas(cuotas);
 
         //Modificar y añadir a base de datos
-        String id = "PR-" + contadorPrestamos++;
-        NewPrestamo prestamo = new NewPrestamo(clienteActual, "", monto, tasa, cuotas, String.valueOf(tipoPrestamo), true, LocalDateTime.MIN, true);
-
+        
         //prestamos.add(prestamo);//Enviar Prestamo a BD
         for (int i = 0; i < 3; i++) {
             //if(CreatePrestamoDB(prestamo))
-            if (PrestamosDAO.CreatePrestamoDB(prestamo)) {
+            if (PrestamosDAO.CreatePrestamoDB(PRESTAPAKA)) {
                 System.out.println("Prestamo registrado con exito");
+                if(volverAPrincipal){clienteActual="";}
                 return;
             }
         }
-
+        
+        if(volverAPrincipal){clienteActual="";}
         System.out.println("No se pudo registrar el prestamo, intentelo mas tarde");
 
         //System.out.println("\nPréstamo creado exitosamente!");
@@ -171,7 +167,7 @@ public class MenuInteractivo {
         System.out.println("\n=== REGISTRAR PAGO ===");
         System.out.println("Cliente: " + clienteActual);
 
-        NewPrestamo prestamo = seleccionarPrestamo();
+        Prestamo prestamo = seleccionarPrestamo();
         if (prestamo == null) {
             return;
         }
@@ -185,10 +181,14 @@ public class MenuInteractivo {
         List<Cuota> cuotasVencidas = Cuota.verificarCuotasEnMora(todasCuotas);
 
         if (!cuotasVencidas.isEmpty()) {
-            if (!pagarCuotas(cuotasVencidas, "cuotas vencidas")) {
+            
+            /*
+            if (!) {
                 return;
-            }
+            }*/
 
+            pagarCuotas(cuotasVencidas, "cuotas vencidas",true);
+            
             // Reflejar pagos en la lista principal
             for (Cuota vencida : cuotasVencidas) {
                 for (Cuota cuota : todasCuotas) {
@@ -201,21 +201,27 @@ public class MenuInteractivo {
             // Verificar que no queden cuotas vencidas sin pagar
             if (cuotasVencidas.stream().anyMatch(c -> !c.isPagado())) {
                 System.out.println("Quedan cuotas en mora. Termine de pagarlas para registrar otros pagos.");
+                if(volverAPrincipal){clienteActual="";}
                 return;
             }
         }
 
-        pagarCuotas(todasCuotas, "cuotas restantes");
+        pagarCuotas(todasCuotas, "cuotas restantes",false);
+        if(volverAPrincipal){clienteActual="";}
     }
 
-    private boolean pagarCuotas(List<Cuota> cuotas, String mensaje) {
+    private boolean pagarCuotas(List<Cuota> cuotas, String mensaje,boolean conMora) {
         while (true) {
             long pendientes = cuotas.stream().filter(c -> !c.isPagado()).count();
             if (pendientes == 0) {
                 System.out.println("No quedan " + mensaje + " que pagar");
                 return true;
             }
-
+            if(conMora){
+                Cuota.showListCuotasConMora(cuotas);
+            }else{
+                Cuota.showListCuotas(cuotas);
+            }
             System.out.println("Ingrese el número de ID de una de las " + mensaje + " para seleccionarla\nIngrese -1 para salir sin realizar pagos");
             int seleccion = LeerInt("Ingrese su selección", -1, cuotas.size());
             if (seleccion == -1) {
@@ -250,13 +256,13 @@ public class MenuInteractivo {
             }
         }
 
-        NewPrestamo prestamo = seleccionarPrestamo();
+        Prestamo prestamo = seleccionarPrestamo();
         if (prestamo != null) {
             mostrarPlanCuotas(prestamo);
         }
     }
 
-    private void mostrarPlanCuotas(NewPrestamo prestamo) {
+    private void mostrarPlanCuotas(Prestamo prestamo) {
         System.out.println("\n=== PLAN DE CUOTAS ===");
         System.out.println("Cliente: " + clienteActual);
 
@@ -280,15 +286,15 @@ public class MenuInteractivo {
         List<Cuota> listaCuotas = ListaDeCuotas(prestamo.getIdPrestamo());
         List<Pago> listaPagos = ListaDePagos(prestamo.getIdPrestamo());
 
-        if(listaCuotas.isEmpty()){
+        if (listaCuotas.isEmpty()) {
             System.out.println("No es posible mostrar datos de Cuotas");
             return;
         }
         // Mostrar cuadro de cuotas detallado
         System.out.println("\n=== DETALLE DE CUOTAS ===");
         System.out.println("----------------------------------------------------------------------------------------");
-        System.out.printf("| %-22s | %-15s | %-12s | %-8s | %-9s | %-10s | %-15s |%n",
-                "Cuota","Vencimiento","Monto Cuota","Tasa Mes","Estado","Penalidad","Fecha Pago");
+        System.out.printf("| %-22s | %-15s | %-20s | %-8s | %-20s | %-20s | %-15s |%n",
+                "Cuota", "Vencimiento", "Monto Cuota", "Tasa Mes", "Estado", "Penalidad", "Fecha Pago");
         System.out.println("----------------------------------------------------------------------------------------");
 
         Pago pagoDeCuota;
@@ -304,11 +310,11 @@ public class MenuInteractivo {
             }
 
             estado = pagoDeCuota.getMontoPagado() > 0 ? "Pagado" : "Sin Pagar";
-            estado = estado + ((pagoDeCuota.getFechaPago().isBefore(cuota.getVencimiento()) && !pagoDeCuota.getFechaPago().isEqual(LocalDateTime.MIN)) ? "" : " con Mora");
+            estado = estado + (((pagoDeCuota.getFechaPago().isBefore(cuota.getVencimiento()) && !pagoDeCuota.getFechaPago().isEqual(LocalDateTime.MIN)) || LocalDateTime.now().isBefore(cuota.getVencimiento())) ? "" : " con Mora");
 
-            penalidad = estado.contains("Mora") ? (cuota.CalcularMora() - cuota.getMonto()) : 0.0;
+            penalidad = estado.contains("Mora") ? (cuota.getMonto() - cuota.CalcularMora()) : 0.0;
 
-            System.out.printf("| %-22s | %-15s | $%-12.2f | %-8.2f%% | %-9s | %-10.2f | %-15s |%n",
+            System.out.printf("| %-22s | %-15s | $%-20.2f | %-8.2f%% | %-20s | %-20.2f | %-15s |%n",
                     cuota.getIdCuota(),
                     cuota.getVencimiento().format(DateTimeFormatter.ISO_LOCAL_DATE),
                     cuota.getMonto(),
@@ -321,6 +327,7 @@ public class MenuInteractivo {
 
         System.out.print("\nPresione Enter para continuar...");
         scanner.nextLine();
+        if(volverAPrincipal){clienteActual="";}
     }
 
     private void mostrarMenuCliente() {
@@ -368,16 +375,19 @@ public class MenuInteractivo {
         } while (true);
     }
 
-    private NewPrestamo seleccionarPrestamo() {
+    private Prestamo seleccionarPrestamo() {
         try {
-            List<NewPrestamo> Nprestamos = ListaDePrestamos(clienteActual, false);
+            List<Prestamo> Nprestamos = ListaDePrestamos(clienteActual, false);
             if (Nprestamos.isEmpty()) {
                 System.out.println("No se encontraron datos de préstamos de esta persona");
                 return null;
             }
             System.out.println("Ingrese el número de ID de uno de los préstamos para seleccionarlo");
-            NewPrestamo.ShowPrestamos(Nprestamos);
+            Prestamo.ShowPrestamos(Nprestamos);
             int seleccionPrestamo = LeerInt("Ingrese su selección", 1, Nprestamos.size()) - 1;
+            if(seleccionPrestamo<0||seleccionPrestamo>=Nprestamos.size()){
+                return null;
+            }
             return Nprestamos.get(seleccionPrestamo);
         } catch (Exception e) {
             e.printStackTrace();
@@ -385,8 +395,8 @@ public class MenuInteractivo {
         }
     }
 
-    public static void main(String[] args) {
-        MenuInteractivo menu = new MenuInteractivo();
+    public static void main() {
+        MenuPrestamo menu = new MenuPrestamo();
         menu.mostrarMenuPrincipal();
     }
 }

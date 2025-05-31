@@ -59,7 +59,7 @@ public class ResultSetUtils {
     public static boolean getBooleanSafe(ResultSet rs, String column) {
         try {
             Object value = rs.getObject(column);
-            return value != null && Boolean.parseBoolean(value.toString());
+            return value != null && (value.toString().equals("1"));
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -1,6 +1,10 @@
-Utils\LeerDataType.class
 Entity\Cliente.class
-poo\itu\sistema_de_gestion_financiera_itu\AlphaMain.class
-Connections\DDBBConnection.class
-poo\itu\sistema_de_gestion_financiera_itu\Sistema_de_Gestion_Financiera_ITU.class
 Utils\ResultSetUtils.class
+prestamo\Cuota.class
+prestamo\MenuPrestamo.class
+connections\DDBBConnection.class
+poo\itu\sistema_de_gestion_financiera_itu\InformesGenerales.class
+poo\itu\sistema_de_gestion_financiera_itu\MenuCliente.class
+connections\PrestamosDAO.class
+poo\itu\sistema_de_gestion_financiera_itu\Sistema_de_Gestion_Financiera_ITU.class
+Utils\LeerDataType.class

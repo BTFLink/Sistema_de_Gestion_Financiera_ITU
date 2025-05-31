@@ -39,12 +39,14 @@ public class LeerDataType {
                 System.out.println(message);
             }
             value = scanner.nextInt();
+            scanner.nextLine();
             if (value >= minValue && value <= maxValue) {
                 return value;
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println(INVALIDDATA);
+            scanner.nextLine();
         }
         if (minValue == Integer.MIN_VALUE) {
             return minValue;

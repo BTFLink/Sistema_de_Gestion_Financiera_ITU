@@ -4,6 +4,8 @@
  */
 package poo.itu.sistema_de_gestion_financiera_itu;
 
+import Connections.InformesGeneralesDAO;
+import Entity.InformesGeneralesEntidad;
 import java.util.Scanner;
 
 /**
@@ -15,7 +17,15 @@ public class InformesGenerales {
     private Scanner sc = new Scanner(System.in);
     private String menu, respuesta;
 
+    public static void main() {
+        InformesGenerales ig = new InformesGenerales();
+        ig.MenuInformesGenerales();
+    }
+
     public InformesGenerales() {
+    }
+
+    public void MenuInformesGenerales() {
         do {
             menu = """
                     \tMenu de Informes
@@ -57,6 +67,7 @@ public class InformesGenerales {
             }
             switch (respuesta.substring(0, 4)) {
                 case "CLI-":
+                    ICCCliente(respuesta);
                     break;
                 case "PRE-":
                     break;
@@ -65,7 +76,7 @@ public class InformesGenerales {
                 case "PAG-":
                     break;
                 case "EXT-":
-                    break;
+                    return;
                 default:
                     throw new AssertionError();
             }
@@ -125,16 +136,41 @@ public class InformesGenerales {
         } while (true);
     }
 
-    private void TraerDatosICC(String CLI, boolean conActivo, boolean sinActivo, boolean conMora, boolean sinMora) {
-        String query = "SELECT ";
-        if (CLI.equals("CLI-*")) {
-            query += "cl.*, ";
-        }else{
-            query += "SELECT cl.* ";
+    private void TraerDatosICC(String UUID, boolean conActivo, boolean sinActivo, boolean conMora, boolean sinMora) {
+
+        switch (UUID.substring(0, 4)) {
+            case "CLI-":
+                if (UUID.equals("CLI-*")) {
+                    InformesGeneralesDAO.IGCGeneralCliente(conActivo, sinActivo, conMora, sinMora);
+                } else {
+                    InformesGeneralesEntidad IGE = InformesGeneralesDAO.IGCUUID(UUID, conActivo, sinActivo, conMora, sinMora);
+                }
+                break;
+            case "PRE-":
+                if (UUID.equals("PRE-*")) {
+                    InformesGeneralesDAO.IGCGeneralCliente(conActivo, sinActivo, conMora, sinMora);
+                } else {
+                    InformesGeneralesEntidad IGE = InformesGeneralesDAO.IGCUUID(UUID, conActivo, sinActivo, conMora, sinMora);
+                }
+                break;
+            case "CUO-":
+                if (UUID.equals("CUO-*")) {
+                    InformesGeneralesDAO.IGCGeneralCliente(conActivo, sinActivo, conMora, sinMora);
+                } else {
+                    InformesGeneralesEntidad IGE = InformesGeneralesDAO.IGCUUID(UUID, conActivo, sinActivo, conMora, sinMora);
+                }
+                break;
+            case "PAG-":
+                if (UUID.equals("PAG-*")) {
+                    InformesGeneralesDAO.IGCGeneralCliente(conActivo, sinActivo, conMora, sinMora);
+                } else {
+                    InformesGeneralesEntidad IGE = InformesGeneralesDAO.IGCUUID(UUID, conActivo, sinActivo, conMora, sinMora);
+                }
+                break;
+            default:
+                throw new AssertionError();
         }
-        query += "FROM `cliente` cl JOIN `prestamos` pr ON cl.idCliente = pr.cliente_idCliente"
-                + "JOIN `cuotas` cu ON cu.prestamo_idPrestamo = pr.idPrestamo"
-                + "JOIN `pagos` pa ON pa.cuota_idcuota = cu.idcuota";
+
     }
 
     private boolean revisorUUID(String UUID) {
@@ -143,5 +179,144 @@ public class InformesGenerales {
                 RegExCuo = "^CUO-[0-9A-Fa-f]{16,}$",
                 RegExPag = "^PAG-[0-9A-Fa-f]{16,}$";
         return UUID.matches(RegExCli) || UUID.matches(RegExPre) || UUID.matches(RegExCuo) || UUID.matches(RegExPag) || UUID.contains("EXT-");
+    }
+
+    private void ICCPrestamo(String UUIDPrestamo) {
+        if (UUIDPrestamo.equals("PRE-*")) {
+            menu = """
+                 Ingrese los datos que desea obtener y luego confirmelos
+                 1) Prestamos activos:     %s
+                 2) Prestamos inactivos:   %s
+                 3) Prestamos en Mora:     %s
+                 4) Prestamos en Sin Mora: %s
+                 0) Confirmar y traer
+                 ex) Salir
+                 """;
+        } else {
+            menu = """
+                 Ingrese los datos que desa obtener y luego confirmelos
+                 3) Cuotas con Mora:  %s
+                 4) Cuotas sin Mora:  %s
+                 0) Confirmar y traer
+                 ex) Salir
+                 """;
+        }
+        boolean conActivo = false, sinActivo = false, conMora = false, sinMora = false;
+        respuesta = "";
+        do {
+            System.out.printf(menu,
+                    conActivo ? "Traer" : "Descartado", sinActivo ? "Traer" : "Descartado",
+                    conMora ? "Traer" : "Descartado", sinMora ? "Traer" : "Descartado");
+            respuesta = sc.nextLine();
+            switch (respuesta) {
+                case "1":
+                    conActivo = !conActivo;
+                    break;
+                case "2":
+                    sinActivo = !sinActivo;
+                    break;
+                case "3":
+                    conMora = !conMora;
+                    break;
+                case "4":
+                    sinMora = !sinMora;
+                    break;
+                case "0":
+                    TraerDatosICPr(UUIDPrestamo, conActivo, sinActivo, conMora, sinMora);
+                    return;
+                case "ex":
+                    return;
+                default:
+                    throw new AssertionError();
+            }
+        } while (true);
+    }
+
+    private void ICCCuota(String UUIDCuota) {
+        if (UUIDCuota.equals("CUO-*")) {
+            menu = """
+                 Ingrese los datos que desea obtener y luego confirmelos
+                 1) Cuotas de Prestamos activos:     %s
+                 2) Cuotas de Prestamos inactivos:   %s
+                 3) Cuotas en/con Mora:              %s
+                 4) Cuotas sin Mora:                 %s
+                 0) Confirmar y traer
+                 ex) Salir
+                 """;
+        } else {
+        }
+        boolean conActivo = false, sinActivo = false, conMora = false, sinMora = false;
+        respuesta = "";
+        do {
+            System.out.printf(menu,
+                    conActivo ? "Traer" : "Descartado", sinActivo ? "Traer" : "Descartado",
+                    conMora ? "Traer" : "Descartado", sinMora ? "Traer" : "Descartado");
+            respuesta = sc.nextLine();
+            switch (respuesta) {
+                case "1":
+                    conActivo = !conActivo;
+                    break;
+                case "2":
+                    sinActivo = !sinActivo;
+                    break;
+                case "3":
+                    conMora = !conMora;
+                    break;
+                case "4":
+                    sinMora = !sinMora;
+                    break;
+                case "0":
+                    TraerDatosICCu(UUIDCuota, conActivo, sinActivo, conMora, sinMora);
+                    return;
+                case "ex":
+                    return;
+                default:
+                    throw new AssertionError();
+            }
+        } while (true);
+    }
+
+    private void ICCPago(String UUIDPago) {
+        if (UUIDPago.equals("PAG-*")) {
+            menu = """
+                 Ingrese los datos que desea obtener y luego confirmelos
+                 1) Pagos de Prestamos activos:     %s
+                 2) Pagos de Prestamos inactivos:   %s
+                 3) Pagos en Mora:                  %s
+                 4) Pagos sin Mora:                 %s
+                 0) Confirmar y traer
+                 ex) Salir
+                 """;
+        } else {
+        }
+        boolean conActivo = false, sinActivo = false, conMora = false, sinMora = false;
+        respuesta = "";
+        do {
+            System.out.printf(menu,
+                    conActivo ? "Traer" : "Descartado", sinActivo ? "Traer" : "Descartado",
+                    conMora ? "Traer" : "Descartado", sinMora ? "Traer" : "Descartado");
+            respuesta = sc.nextLine();
+            switch (respuesta) {
+                case "1":
+                    conActivo = !conActivo;
+                    break;
+                case "2":
+                    sinActivo = !sinActivo;
+                    break;
+                case "3":
+                    conMora = !conMora;
+                    break;
+                case "4":
+                    sinMora = !sinMora;
+                    break;
+                case "0":
+                    TraerDatosICPa(UUIDPago, conActivo, sinActivo, conMora, sinMora);
+                    return;
+                case "ex":
+                    return;
+                default:
+                    throw new AssertionError();
+            }
+        } while (true);
     }
 }

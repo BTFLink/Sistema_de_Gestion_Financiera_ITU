@@ -115,10 +115,11 @@ public class Cuota {
         return vencidas;
     }
 
-    public void showListCuotas(List<Cuota> listaCuotas) {
+    public static void showListCuotas(List<Cuota> listaCuotas) {
 
         String encabezado = String.format(
-                "%-10s %10s %10s %-10s %-20s",
+                "%-3s %-25s %10s %10s %-10s %-20s",
+                "ID",
                 "ID Cuota",
                 "Monto",
                 "Interés",
@@ -126,9 +127,10 @@ public class Cuota {
                 "Vencimiento"
         );
         System.out.println(encabezado);
+        int ID=1;
         for (Cuota cuota : listaCuotas) {
-            System.out.println(cuota.toColumnString());
-
+            System.out.printf("%-3s %s%n",ID,cuota.toColumnString());
+            ID++;
         }
 
     }
@@ -144,7 +146,7 @@ public class Cuota {
                 CalcularMora());
     }
     
-    public void showListCuotasConMora(List<Cuota> listaCuotas) {
+    public static void showListCuotasConMora(List<Cuota> listaCuotas) {
         String encabezado = String.format(
                 "%-4s %-25s %10s %10s %-10s %-20s %-10s",
                 "ID",
@@ -159,7 +161,7 @@ public class Cuota {
         int ID = 1;
         for (Cuota cuota : listaCuotas) {
             if (!cuota.isPagado() && cuota.getVencimiento().isBefore(LocalDateTime.now())) {
-                System.out.println(String.format("%-4s %s", ID, showCuotaConMora(cuota)));
+                System.out.println(String.format("%-4s %s", ID, cuota.showCuotaConMora(cuota)));
             } else {
                 System.out.println(String.format(
                         "%-4s %-25s %10.2f %10.2f %-10s %-20s %-10s",

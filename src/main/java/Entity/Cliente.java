@@ -99,7 +99,7 @@ public class Cliente {
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
-        String Query = String.format("INSERT INTO `seconddatabase`.`cliente` (`idCliente`, `nombre`, `direccion`, `telefono`, `correoElectronico`) VALUES (generar_idCliente(), '%s', '%s', %d, '%s');", nombre, direccion, telefono, correoElectronico);
+        String Query = String.format("INSERT INTO `cliente` (`idCliente`, `nombre`, `direccion`, `telefono`, `correoElectronico`) VALUES (generar_idCliente(), '%s', '%s', %d, '%s');", nombre, direccion, telefono, correoElectronico);
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
@@ -110,7 +110,7 @@ public class Cliente {
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
-        String Query = String.format("UPDATE `seconddatabase`.`cliente` SET `nombre` = '%s', `direccion`= '%s', `telefono`= %d, `correoElectronico`= '%s' WHERE idCliente = '%s';", nombre, direccion, telefono, correoElectronico, idCliente);
+        String Query = String.format("UPDATE `cliente` SET `nombre` = '%s', `direccion`= '%s', `telefono`= %d, `correoElectronico`= '%s' WHERE idCliente = '%s';", nombre, direccion, telefono, correoElectronico, idCliente);
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
@@ -118,7 +118,7 @@ public class Cliente {
 
     public static Cliente searchAClient(String UUID) {
 
-        if (UUID.equals("")) {
+        if (!UUID.contains("CLI-") || UUID.equals("CLI-*")) {
             System.out.println("El UUID es invalido");
             return new Cliente();
         }
@@ -178,10 +178,10 @@ public class Cliente {
             return false;
         }
         
-        String query = "SELECT EXISTS (SELECT 1 FROM usuarios WHERE email = '" + UUID + "') AS existe";
+        String query = "SELECT EXISTS (SELECT 1 FROM cliente WHERE idCliente = '" + UUID + "') AS existe";
         try {
             ResultSet rs = fetchData(query);
-            if (rs.next()) {
+            if ( rs.next()) {
                 return getBooleanSafe(rs, "existe");
             }
         } catch (SQLException e) {
