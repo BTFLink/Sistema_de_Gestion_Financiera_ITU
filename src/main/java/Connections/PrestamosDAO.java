@@ -135,7 +135,7 @@ public class PrestamosDAO {
             if(rs != null){
                 while (rs.next()) {
                     cuota.setIdCuota(getStringSafe(rs, "idcuota"));
-                    cuota.setIdPrestamo(getStringSafe(rs, "prestamo_idPrestamo"));
+                    cuota.setIdPrestamo(getStringSafe(rs, "prestamos_idPrestamo"));
                     cuota.setInteres(getDoubleSafe(rs, "interesCuota"));
                     cuota.setMonto(getDoubleSafe(rs, "montoCuota"));
                     cuota.setPagado(getBooleanSafe(rs, "pagado"));
@@ -216,7 +216,7 @@ public class PrestamosDAO {
                 if(UUID.equals("CUO-*")){
                     return new Pago();
                 }
-                Query += "cuota_idcuota = '"+UUID+"'";
+                Query += "cuotas_idcuota = '"+UUID+"'";
                 break;
             case "PAG-":
                 if(UUID.equals("PAG-*")){

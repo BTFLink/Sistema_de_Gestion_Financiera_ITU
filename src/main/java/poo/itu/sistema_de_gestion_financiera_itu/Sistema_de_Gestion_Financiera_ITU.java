@@ -35,7 +35,7 @@ public class Sistema_de_Gestion_Financiera_ITU {
                     MenuPrestamo.main();
                     break;
                 case "3":
-                    InformesGenerales.main();
+                    IGenerals.main();
                     break;
                 case "0":
                     System.out.println("SALE BYE");

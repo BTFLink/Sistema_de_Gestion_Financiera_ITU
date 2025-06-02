@@ -75,6 +75,24 @@ public class Cliente {
     public void setTelefono(Long telefono) {
         this.telefono = telefono;
     }
+    
+    public String printClientData(boolean listType){
+        if (idCliente.equals("")) {
+            return "";
+        }
+        if (listType) {
+            return String.format("%-20s | %-50s | %-15s | %-100s | %-255s",
+                    this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico);
+        } else {
+            return String.format("""
+                                         UUID:      %s
+                                         Nombre:    %s
+                                         Telefono:  %s
+                                         Direccion: %s
+                                         Email:     %s
+                                         """, this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico);
+        }
+    }
 
     public void showClientData(boolean listType) {
         if (idCliente.equals("")) {

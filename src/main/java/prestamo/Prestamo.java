@@ -122,6 +122,37 @@ public class Prestamo {
         this.estaPagado = estaPagado;
     }
 
+    public String printPrestamo(boolean encabezado) {
+        StringBuilder prestamo = new StringBuilder();
+        if (encabezado) {
+            prestamo.append(String.format(
+                    "%-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |%n",
+                    "ID Cliente",
+                    "ID Préstamo",
+                    "Monto",
+                    "Interés",
+                    "Cuotas",
+                    "Tipo Préstamo",
+                    "Cuota",
+                    "Fecha Creación",
+                    "Estado"
+            ));
+        }
+        prestamo.append(String.format(
+                    "%-22s | %-22s | %10.2f | %14.2f | %13d | %-15s | %-10s | %-20s | %-10s |",
+                    this.getIdCliente(),
+                    this.getIdPrestamo(),
+                    this.getMonto(),
+                    this.getInteresInicial(),
+                    this.getNumeroCuotas(),
+                    this.getTipoPrestamo(),
+                    this.isTipoCuota() ? "Fijo" : "Variable",
+                    this.getFechaCreacion() != null ? this.getFechaCreacion().toString() : "null",
+                    this.isEstaPagado() ? "Pagado" : "Pendiente"
+            ));
+        return prestamo.toString();
+    }
+
     public static void ShowPrestamos(List<Prestamo> Prestamos) {
         String encabezado = String.format(
                 "%-3s | %-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
@@ -242,7 +273,6 @@ public class Prestamo {
         } while (true);
     }
 
-    
     //VVVVV No se como funciona esto VVVV @Bruno_Olguin
     public double calcularTotalIntereses() {
         double tasaMensual = getInteresInicial() / 12 / 100;
@@ -268,5 +298,5 @@ public class Prestamo {
     private double calcularCuota(double tasaInteresMensual, int plazo, double monto) {
         return monto * (tasaInteresMensual * Math.pow(1 + tasaInteresMensual, plazo)) / (Math.pow(1 + tasaInteresMensual, plazo) - 1);
     }
-   
+
 }

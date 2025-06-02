@@ -1,10 +1,13 @@
 Entity\Cliente.class
 Utils\ResultSetUtils.class
+connections\InformesGeneralesDAO.class
 prestamo\Cuota.class
 prestamo\MenuPrestamo.class
 connections\DDBBConnection.class
-poo\itu\sistema_de_gestion_financiera_itu\InformesGenerales.class
 poo\itu\sistema_de_gestion_financiera_itu\MenuCliente.class
+Entity\InformesGeneralesEntidad.class
 connections\PrestamosDAO.class
+poo\itu\sistema_de_gestion_financiera_itu\IGenerals.class
 poo\itu\sistema_de_gestion_financiera_itu\Sistema_de_Gestion_Financiera_ITU.class
 Utils\LeerDataType.class
+connections\Exportador.class

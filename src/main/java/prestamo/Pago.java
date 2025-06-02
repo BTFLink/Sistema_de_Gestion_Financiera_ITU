@@ -1,6 +1,7 @@
 package prestamo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class Pago {
 
@@ -85,4 +86,66 @@ public class Pago {
         this.fechaPago = fechaPago;
     }
 
+    public String printPago(boolean encabezado) {
+        StringBuilder pago = new StringBuilder();
+        if (encabezado) {
+            pago.append(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |%n" ,
+                    "ID Cuota",
+                    "ID Pago",
+                    "Penalidad",
+                    "Monto Pago",
+                    "Fecha Del Pago"
+            ));
+        }
+        pago.append(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |",
+                this.getCuota_idCuota(),
+                this.getIdPago(),
+                this.isPenalidad() ? "Si" : "No",
+                this.getMontoPagado(),
+                this.getFechaPago()
+        ));
+        return pago.toString();
+    }
+
+    public void showPago() {
+        String encabezado = String.format("%-25s | %-25s | %-10s | %-12s | %-15s |",
+                "ID Cuota",
+                "ID Pago",
+                "Penalidad",
+                "Monto Pago",
+                "Fecha Del Pago"
+        );
+        System.out.println(encabezado);
+        System.out.println(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |",
+                this.getCuota_idCuota(),
+                this.getIdPago(),
+                this.isPenalidad() ? "Si" : "No",
+                this.getMontoPagado(),
+                this.getFechaPago()
+        ));
+    }
+
+    public static void showListaPago(List<Pago> ListaDePagos) {
+        String encabezado = String.format("%-4s | %-25s | %-25s | %-10s | %-12s | %-15s |",
+                "ID",
+                "ID Cuota",
+                "ID Pago",
+                "Penalidad",
+                "Monto Pago",
+                "Fecha Del Pago"
+        );
+        System.out.println(encabezado);
+        int ID = 1;
+        for (Pago pago : ListaDePagos) {
+            System.out.println(String.format("%-4s | %-25s | %-25s | %-10s | %-12s | %-15s |",
+                    ID,
+                    pago.getCuota_idCuota(),
+                    pago.getIdPago(),
+                    pago.isPenalidad() ? "Si" : "No",
+                    pago.getMontoPagado(),
+                    pago.getFechaPago()
+            ));
+            ID++;
+        }
+    }
 }

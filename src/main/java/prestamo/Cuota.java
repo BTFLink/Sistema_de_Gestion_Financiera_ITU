@@ -90,7 +90,7 @@ public class Cuota {
 
     public String toColumnString() {
         return String.format(
-                "%-25s %10.2f %10.2f %-10s %-20s",
+                "%-25s | %10.2f | %10.2f | %-10s | %-20s |",
                 idCuota,
                 monto,
                 interes,
@@ -118,7 +118,7 @@ public class Cuota {
     public static void showListCuotas(List<Cuota> listaCuotas) {
 
         String encabezado = String.format(
-                "%-3s %-25s %10s %10s %-10s %-20s",
+                "%-3s | %-25s | %10s | %10s | %-10s | %-20s |",
                 "ID",
                 "ID Cuota",
                 "Monto",
@@ -129,15 +129,33 @@ public class Cuota {
         System.out.println(encabezado);
         int ID=1;
         for (Cuota cuota : listaCuotas) {
-            System.out.printf("%-3s %s%n",ID,cuota.toColumnString());
+            System.out.printf("%-3s | %s%n",ID,cuota.toColumnString());
             ID++;
         }
 
     }
+    
+    public String printCuotaConMora(Cuota cuota, boolean conEncabezado){
+        String encabezado = String.format(
+                "%-25s | %-25s | %10s | %10s | %-10s | %-20s | %-10s |",
+                "ID Prestamo",
+                "ID Cuota",
+                "Monto",
+                "Interés",
+                "Pagado",
+                "Vencimiento",
+                "Contiene Mora"
+        );
+        if(conEncabezado){
+            return String.format("%s%n%s", encabezado, showCuotaConMora(cuota));
+        }
+        return showCuotaConMora(cuota);
+    }
 
     public String showCuotaConMora(Cuota cuota) {
         return String.format(
-                "%-25s %10.2f %10.2f %-10s %-20s %-10.2f",
+                "%-25s | %-25s | %10.2f | %10.2f | %-10s | %-20s | %-10.2f |",
+                cuota.getIdPrestamo(),
                 cuota.getIdCuota(),
                 cuota.getMonto(),
                 cuota.getInteres(),
@@ -148,8 +166,9 @@ public class Cuota {
     
     public static void showListCuotasConMora(List<Cuota> listaCuotas) {
         String encabezado = String.format(
-                "%-4s %-25s %10s %10s %-10s %-20s %-10s",
+                "%-4s | %-25s | %-25s | %10s | %10s | %-10s | %-20s | %-10s |",
                 "ID",
+                "ID Prestamo",
                 "ID Cuota",
                 "Monto",
                 "Interés",
@@ -164,8 +183,9 @@ public class Cuota {
                 System.out.println(String.format("%-4s %s", ID, cuota.showCuotaConMora(cuota)));
             } else {
                 System.out.println(String.format(
-                        "%-4s %-25s %10.2f %10.2f %-10s %-20s %-10s",
+                        "%-4s | %-25s | %-25s | %10.2f | %10.2f | %-10s | %-20s | %-10s |",
                         ID,
+                        cuota.getIdPrestamo(),
                         cuota.getIdCuota(),
                         cuota.getMonto(),
                         cuota.getInteres(),
