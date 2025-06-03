@@ -12,9 +12,9 @@ import prestamo.MenuPrestamo;
  * @author BTF
  */
 public class Sistema_de_Gestion_Financiera_ITU {
-
+//Clase del Menu Principal del Sis tema de Gestion Financiera
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        System.out.println("Sistema de Gestion Financiera");
         Scanner sc = new Scanner(System.in);
         String menu="""
                     \tMenu Principal
@@ -29,16 +29,16 @@ public class Sistema_de_Gestion_Financiera_ITU {
             respuesta = sc.nextLine();
             switch (respuesta) {
                 case "1":
-                    MenuCliente.main();
+                    MenuCliente.main(); //Menu para la creacion de Clientes
                     break;
                 case "2":
-                    MenuPrestamo.main();
+                    MenuPrestamo.main(); //Menu para la creacion de Prestamos
                     break;
                 case "3":
-                    IGenerals.main();
+                    IGenerals.main(); //Menu de informes generales
                     break;
                 case "0":
-                    System.out.println("SALE BYE");
+                    System.out.println("SALE BYE"); //SALIDA
                     return;
                 default:
                     System.out.println("Respuesta invalida");

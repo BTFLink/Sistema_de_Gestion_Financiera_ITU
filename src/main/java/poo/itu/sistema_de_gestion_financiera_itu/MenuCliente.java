@@ -13,7 +13,7 @@ import java.util.Scanner;
  * @author BTF
  */
 public class MenuCliente {
-
+//Valores basicos para el funcionamiento y regulacion del programa
     static Scanner scanner = new Scanner(System.in);
     static String respuesta;
     private static final String UNERR = "Error Inesperado, volviendo", INVALIDOPTION = "Opcion Invalida",
@@ -33,7 +33,7 @@ public class MenuCliente {
         do {
             System.out.println(menu);
             respuesta = scanner.nextLine();
-            switch (respuesta) {
+            switch (respuesta) {//Menu de opciones
                 case "1":
                     registrarCliente();
                     break;
@@ -77,6 +77,7 @@ public class MenuCliente {
                 cliente.setTelefono(LeerLong("Ingrese el telefono del cliente"));
             }
 
+            //Esta seccion verifica que todos los valores ingresado para cliente sean validos antes de continuar
             nombre = cliente.getNombre().matches(REGEXNA);
             email = cliente.getCorreoElectronico().matches(REGEXEMAIL);
             direccion = !cliente.getDireccion().equals("");
@@ -87,6 +88,8 @@ public class MenuCliente {
                 System.out.println("Hay uno o mas datos mal ingresados");
             }
         } while (!compleate);
+        
+        //Aqui se intenta registrar al cliente, tiene 3 intentos en caso de fallo, si no funciona avisa de un fallo en el registro
         try {
             for (int i = 0; i < 3; i++) {
                 if (cliente.registrarCliente()) {
@@ -102,7 +105,7 @@ public class MenuCliente {
     }
 
     private static void editarCliente() {
-        String UUID = EnterUUID();
+        String UUID = EnterUUID(); //Se verifica si el UUID ingresado es valido, o sale del editor en caso de no serlo
         if (UUID.equals("")) {
             return;
         }
@@ -127,6 +130,8 @@ public class MenuCliente {
             valid = true;
             System.out.println(menu);
             respuesta = scanner.nextLine();
+            
+            //Se elige lo que se desea editar, en caso de ingresar un mismo valor o uno invalido el programa no realizara ningun cambio
             switch (respuesta) {
                 case "1":
                     System.out.println("Ingrese nombre y apellido del cliente (50 char max)");
@@ -170,7 +175,7 @@ public class MenuCliente {
                     valid = false;
             }
 
-            if (change) {
+            if (change) { //Si se detecta un cambio se enviara a la base de datos con 3 intentos como maximo
                 try {
                     for (int i = 0; i < 3; i++) {
                         if (cliente.actualizarCliente()) {
@@ -186,7 +191,7 @@ public class MenuCliente {
                     System.out.println(e.getMessage());
                     System.out.println("No pudo actualizarse el cliente, revirtiendo cambios");
                 }
-                if (change) {
+                if (change) { //En caso de que la actualizacion haya fallado los cambios se revierten para no mostrar valores erroneos
                     switch (respuesta) {
                         case "1":
                             cliente.setNombre(oldString);
@@ -209,7 +214,7 @@ public class MenuCliente {
         } while (true);
     }
 
-    private static String EnterUUID() {
+    private static String EnterUUID() { //Verificador de UUID
         String UUID = "";
         System.out.println("Ingrese el UUID del cliente");
         for (int i = 0; i < 3; i++) {

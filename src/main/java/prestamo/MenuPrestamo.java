@@ -34,9 +34,10 @@ public class MenuPrestamo {
                     Seleccione una opción: """;
         do {
             opcion = LeerInt(menu, 1, 5);
+            //Selecciona un cliente para trabajar exclusivamente con ese o ingresar el codigo una vez por modulo
             switch (opcion) {
                 case 1:
-                    seleccionarCliente(false);
+                    seleccionarCliente(false); 
                     break;
                 case 2:
                     crearPrestamo();
@@ -149,11 +150,8 @@ public class MenuPrestamo {
             }
         }
         
-        if(volverAPrincipal){clienteActual="";}
+        if(volverAPrincipal){clienteActual="";}  //en caso de no haber usado selector de cliente reinicia la variable
         System.out.println("No se pudo registrar el prestamo, intentelo mas tarde");
-
-        //System.out.println("\nPréstamo creado exitosamente!");
-        //System.out.println("ID del préstamo: " + id);
     }
 
     private void registrarPago() {
@@ -182,11 +180,6 @@ public class MenuPrestamo {
 
         if (!cuotasVencidas.isEmpty()) {
             
-            /*
-            if (!) {
-                return;
-            }*/
-
             pagarCuotas(cuotasVencidas, "cuotas vencidas",true);
             
             // Reflejar pagos en la lista principal
@@ -217,6 +210,7 @@ public class MenuPrestamo {
                 System.out.println("No quedan " + mensaje + " que pagar");
                 return true;
             }
+            
             if(conMora){
                 Cuota.showListCuotasConMora(cuotas);
             }else{

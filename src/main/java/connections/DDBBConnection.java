@@ -22,7 +22,12 @@ public abstract class DDBBConnection {
 
     private static String DB = "thirdbase";
     private static String URL = "jdbc:mysql://localhost:3306/" + DB
-            + "?zeroDateTimeBehavior=round&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    + "?zeroDateTimeBehavior=round"
+    + "&useUnicode=true"
+    + "&characterEncoding=latin1"
+    + "&useJDBCCompliantTimezoneShift=true"
+    + "&useLegacyDatetimeCode=false"
+    + "&serverTimezone=UTC";
     private static String User = "root";
     private static String Password = "1111";
     private static String Driver = "com.mysql.cj.jdbc.Driver";
