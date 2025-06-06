@@ -139,17 +139,17 @@ public class Prestamo {
             ));
         }
         prestamo.append(String.format(
-                    "%-22s | %-22s | %10.2f | %14.2f | %13d | %-15s | %-10s | %-20s | %-10s |",
-                    this.getIdCliente(),
-                    this.getIdPrestamo(),
-                    this.getMonto(),
-                    this.getInteresInicial(),
-                    this.getNumeroCuotas(),
-                    this.getTipoPrestamo(),
-                    this.isTipoCuota() ? "Fijo" : "Variable",
-                    this.getFechaCreacion() != null ? this.getFechaCreacion().toString() : "null",
-                    this.isEstaPagado() ? "Pagado" : "Pendiente"
-            ));
+                "%-22s | %-22s | %10.2f | %14.2f | %13d | %-15s | %-10s | %-20s | %-10s |",
+                this.getIdCliente(),
+                this.getIdPrestamo(),
+                this.getMonto(),
+                this.getInteresInicial(),
+                this.getNumeroCuotas(),
+                this.getTipoPrestamo(),
+                this.isTipoCuota() ? "Fijo" : "Variable",
+                this.getFechaCreacion() != null ? this.getFechaCreacion().toString() : "null",
+                this.isEstaPagado() ? "Pagado" : "Pendiente"
+        ));
         return prestamo.toString();
     }
 
@@ -214,7 +214,7 @@ public class Prestamo {
             } else {
                 this.monto = LeerDouble("Monto del préstamo: ", 5000000, 70000000);
             }
-            if (this.monto != Double.NaN) {
+            if (!Double.isNaN(this.monto)) {
                 break;
             }
             System.out.println("Monto Invalido");
@@ -222,7 +222,7 @@ public class Prestamo {
 
         do {
             this.interesInicial = LeerDouble("Tasa de interés inicial anual (%): ", 0, 100);
-            if (this.interesInicial != Double.NaN) {
+            if (!Double.isNaN(this.interesInicial)) {
                 break;
             }
             System.out.println("Interes Invalido");
@@ -273,30 +273,44 @@ public class Prestamo {
         } while (true);
     }
 
-    //VVVVV No se como funciona esto VVVV @Bruno_Olguin
     public double calcularTotalIntereses() {
-        double tasaMensual = getInteresInicial() / 12 / 100;
+        double tasaMensual = getInteresInicial() / 12;
 
         if (isTipoCuota()) {
-            return calcularCuota(tasaMensual, getNumeroCuotas(), getMonto());
+            return (calcularCuota(tasaMensual, getNumeroCuotas(), getMonto()) * getNumeroCuotas()) - getMonto();
         } else {
-            int cuotasRestantes = getNumeroCuotas();
-            int mes = 1;
-            while (cuotasRestantes > 0) {
-                int cuotasEnBloque = Math.max(12, Math.min(cuotasRestantes, 3));
-                double cuota = calcularCuota(tasaMensual, cuotasEnBloque, getMonto());
-                System.out.println("Cuota para los meses " + mes + " a " + (mes + cuotasEnBloque - 1) + ": " + cuota);
-                cuotasRestantes -= cuotasEnBloque;
-                mes += cuotasEnBloque;
-                tasaMensual *= 1.03; // Incrementa la tasa de interés un 3%
-            }
-            return calcularCuota(tasaMensual, mes, getMonto());
-        }
+            double cuota;
+            double cuotaTotal = 0;
+            int cuotasTotales = getNumeroCuotas();
+            for (int i = 1; i <= cuotasTotales; i += 3) {
+                int cuotasEnEsteBloque = Math.min(3, cuotasTotales - (i - 1)); // calcula si quedan 1, 2 o 3 cuotas
+                cuota = calcularCuota(tasaMensual, cuotasTotales, getMonto());
 
+                // Muestra para depuración
+                System.out.printf("Cuota para los meses %d a %d: %.2f%n", i, (i + cuotasEnEsteBloque - 1), cuota);
+
+                cuotaTotal += cuota * cuotasEnEsteBloque;
+
+                tasaMensual += 1; // subir la tasa mensual en 1% (porque es porcentaje)
+            }
+            return cuotaTotal - getMonto();
+        }
     }
 
     private double calcularCuota(double tasaInteresMensual, int plazo, double monto) {
-        return monto * (tasaInteresMensual * Math.pow(1 + tasaInteresMensual, plazo)) / (Math.pow(1 + tasaInteresMensual, plazo) - 1);
+        return (monto / plazo) * (1 + (tasaInteresMensual / 100));
     }
 
+    public double calcularCuotaFija() { //Solo para cuotas fijas
+        return calcularCuota(1);
+    }
+
+    public double calcularCuota(int cuota_actual) {
+        double tasaMensual = getInteresInicial() / 12;
+        if (isTipoCuota()) {
+            return calcularCuota(tasaMensual, getNumeroCuotas(), getMonto());
+        }
+        tasaMensual += (int) ((cuota_actual - 1) / 3);
+        return calcularCuota(tasaMensual, getNumeroCuotas(), getMonto());
+    }
 }

@@ -19,6 +19,7 @@ public class Cliente {
 
     private String nombre, idCliente, direccion, correoElectronico;
     private Long telefono;
+    private int dni;
 
     public Cliente() {
         this.nombre = "";
@@ -26,6 +27,7 @@ public class Cliente {
         this.direccion = "";
         this.correoElectronico = "";
         this.telefono = 0L;
+        this.dni = 0;
     }
 
     public Cliente(String nombre, String idCliente, String direccion, String correoElectronico, Long telefono) {
@@ -34,6 +36,15 @@ public class Cliente {
         this.direccion = direccion;
         this.correoElectronico = correoElectronico;
         this.telefono = telefono;
+    }
+
+    public Cliente(String nombre, String idCliente, String direccion, String correoElectronico, Long telefono, int dni) {
+        this.nombre = nombre;
+        this.idCliente = idCliente;
+        this.direccion = direccion;
+        this.correoElectronico = correoElectronico;
+        this.telefono = telefono;
+        this.dni = dni;
     }
 
     public String getNombre() {
@@ -75,22 +86,31 @@ public class Cliente {
     public void setTelefono(Long telefono) {
         this.telefono = telefono;
     }
-    
-    public String printClientData(boolean listType){
+
+    public int getDni() {
+        return dni;
+    }
+
+    public void setDni(int dni) {
+        this.dni = dni;
+    }
+
+    public String printClientData(boolean listType) {
         if (idCliente.equals("")) {
             return "";
         }
         if (listType) {
-            return String.format("%-20s | %-50s | %-15s | %-100s | %-255s",
-                    this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico);
+            return String.format("%-20s | %-50s | %-10s | %-15s | %-100s | %-255s",
+                    this.idCliente, this.nombre, String.valueOf(this.dni), String.valueOf(this.telefono), this.direccion, this.correoElectronico);
         } else {
             return String.format("""
                                          UUID:      %s
                                          Nombre:    %s
+                                         DNI:       %s
                                          Telefono:  %s
                                          Direccion: %s
                                          Email:     %s
-                                         """, this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico);
+                                         """, this.idCliente, this.nombre, String.valueOf(this.dni), String.valueOf(this.telefono), this.direccion, this.correoElectronico);
         }
     }
 
@@ -99,16 +119,27 @@ public class Cliente {
             return;
         }
         if (listType) {
-            System.out.println(String.format("%-20s | %-50s | %-15s | %-100s | %-255s",
-                    this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico));
+            System.out.println(String.format("%-20s | %-50s | %-10s | %-15s | %-100s | %-255s",
+                    this.idCliente, this.nombre, String.valueOf(this.dni), String.valueOf(this.telefono), this.direccion, this.correoElectronico));
         } else {
             System.out.println(String.format("""
                                          UUID:      %s
                                          Nombre:    %s
+                                         DNI:       %s
                                          Telefono:  %s
                                          Direccion: %s
                                          Email:     %s
-                                         """, this.idCliente, this.nombre, String.valueOf(this.telefono), this.direccion, this.correoElectronico));
+                                         """, this.idCliente, this.nombre, String.valueOf(this.dni), String.valueOf(this.telefono), this.direccion, this.correoElectronico));
+        }
+    }
+    
+    public static void showClientList(List<Cliente> listaDeClientes){
+        System.out.println(String.format("%-20s | %-50s | %-10s | %-15s | %-100s | %-255s",
+                "UUID", "Nombre", "DNI", "Telefono", "Direccion", "Email"));
+        System.out.println("--------------------------------");
+        for (Cliente lC : listaDeClientes) {
+            lC.showClientData(true);
+            System.out.println("--------------------------------");
         }
     }
 
@@ -117,7 +148,7 @@ public class Cliente {
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
-        String Query = String.format("INSERT INTO `cliente` (`idCliente`, `nombre`, `direccion`, `telefono`, `correoElectronico`) VALUES (generar_idCliente(), '%s', '%s', %d, '%s');", nombre, direccion, telefono, correoElectronico);
+        String Query = String.format("INSERT INTO `cliente` (`idCliente`, `nombre`, `dni`, `direccion`, `telefono`, `correoElectronico`) VALUES (generar_idCliente(), '%s', %d, '%s', %d, '%s');", nombre, dni, direccion, telefono, correoElectronico);
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
@@ -128,7 +159,7 @@ public class Cliente {
             System.out.println("Datos Minimos no encontrados, cancelando registro de datos");
             return false;
         }
-        String Query = String.format("UPDATE `cliente` SET `nombre` = '%s', `direccion`= '%s', `telefono`= %d, `correoElectronico`= '%s' WHERE idCliente = '%s';", nombre, direccion, telefono, correoElectronico, idCliente);
+        String Query = String.format("UPDATE `cliente` SET `nombre` = '%s', `dni` = %d, `direccion`= '%s', `telefono`= %d, `correoElectronico`= '%s' WHERE idCliente = '%s';", nombre, dni, direccion, telefono, correoElectronico, idCliente);
         String Respuesta = SendQuery(Query);
         System.out.println("Resultado de registro: " + Respuesta);
         return Respuesta.equals("OK");
@@ -147,13 +178,12 @@ public class Cliente {
             ResultSet rs = fetchData(query);
             if (rs != null) {
                 while (rs.next()) {
-
                     cliente.setIdCliente(getStringSafe(rs, "idCliente"));
                     cliente.setNombre(getStringSafe(rs, "nombre"));
                     cliente.setDireccion(getStringSafe(rs, "direccion"));
                     cliente.setCorreoElectronico(getStringSafe(rs, "correoElectronico"));
                     cliente.setTelefono(getLongSafe(rs, "telefono"));
-
+                    cliente.setDni(getIntSafe(rs, "dni"));
                 }
             }
         } catch (SQLException e) {
@@ -162,7 +192,7 @@ public class Cliente {
         return cliente;
     }
 
-    public static void traerTodos() {
+    public static List<Cliente> traerTodos() {
         String query = "SELECT * FROM cliente;";
         List<Cliente> listClientes = new ArrayList<>();
         try {
@@ -175,31 +205,26 @@ public class Cliente {
                     cliente.setDireccion(getStringSafe(rs, "direccion"));
                     cliente.setCorreoElectronico(getStringSafe(rs, "correoElectronico"));
                     cliente.setTelefono(getLongSafe(rs, "telefono"));
+                    cliente.setDni(getIntSafe(rs, "dni"));
                     listClientes.add(cliente);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println(String.format("%-20s | %-50s | %-15s | %-100s | %-255s",
-                "UUID", "Nombre", "Telefono", "Direccion", "Email"));
-        System.out.println("--------------------------------");
-        for (Cliente lC : listClientes) {
-            lC.showClientData(true);
-            System.out.println("--------------------------------");
-        }
+        return listClientes;
     }
 
     public static boolean existeCliente(String UUID) {
-        if(!UUID.matches("^CLI-[0-9A-Fa-f]{16}$")){
+        if (!UUID.matches("^CLI-[0-9A-Fa-f]{16}$")) {
             System.out.println("Identificador Invalido");
             return false;
         }
-        
+
         String query = "SELECT EXISTS (SELECT 1 FROM cliente WHERE idCliente = '" + UUID + "') AS existe";
         try {
             ResultSet rs = fetchData(query);
-            if ( rs.next()) {
+            if (rs.next()) {
                 return getBooleanSafe(rs, "existe");
             }
         } catch (SQLException e) {

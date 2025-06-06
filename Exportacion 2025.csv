@@ -1,0 +1,10 @@
+﻿Datos del Cliente
+UUID;CLI-0000000000000002
+Nombre;Santino Tiziano Olguin
+Telefono;"2634336879"
+Direccion;Nueva Esperanza S/N, la colonia, Junin
+Email;santinoolguin@gmail.com
+
+Datos del Prestamo
+ID Cliente;ID Préstamo;Monto;Interés;Cuotas;Tipo Préstamo;Cuota;Fecha Creación;Estado;
+CLI-0000000000000002;PRE-0000000000000005;200000,00;34,00;12;HIPOTECARIO;Fijo;2025-06-04T10:53:27;Pendiente;Cuotas sin mora detectadas

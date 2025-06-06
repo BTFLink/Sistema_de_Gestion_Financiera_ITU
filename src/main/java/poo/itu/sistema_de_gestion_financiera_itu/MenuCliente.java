@@ -44,7 +44,7 @@ public class MenuCliente {
                     Cliente.searchAClient(EnterUUID()).showClientData(false);
                     break;
                 case "4":
-                    Cliente.traerTodos();
+                    Cliente.showClientList(Cliente.traerTodos());
                     break;
                 case "0":
                     return;
@@ -56,11 +56,16 @@ public class MenuCliente {
 
     private static void registrarCliente() {
         Cliente cliente = new Cliente();
-        boolean nombre = false, direccion = false, email = false, telefono = false, compleate;
+        boolean nombre = false, dni = false, direccion = false, email = false, telefono = false, compleate;
         do {
             if (!nombre) {
                 System.out.println("Ingrese nombre y apellido del cliente (50 char max)");
                 cliente.setNombre(scanner.nextLine());
+            }
+            
+            if(!dni){
+                System.out.println("Ingrese el DNI del cliente");
+                cliente.setDni(LeerInt(1000000, 80000000));
             }
 
             if (!direccion) {
@@ -79,10 +84,11 @@ public class MenuCliente {
 
             //Esta seccion verifica que todos los valores ingresado para cliente sean validos antes de continuar
             nombre = cliente.getNombre().matches(REGEXNA);
+            dni = cliente.getDni()>=1000000;
             email = cliente.getCorreoElectronico().matches(REGEXEMAIL);
             direccion = !cliente.getDireccion().equals("");
             telefono = (cliente.getTelefono() > 1000000000L && cliente.getTelefono() < 6000000000L);
-            compleate = nombre && email && direccion && telefono;
+            compleate = nombre && email && direccion && telefono && dni;
 
             if (!compleate) {
                 System.out.println("Hay uno o mas datos mal ingresados");
@@ -120,10 +126,12 @@ public class MenuCliente {
                                   2) Editar Direccion
                                   3) Editar Correo Electronico
                                   4) Editar Telefono
+                                  5) Editar DNI
                                   0) Salir
                                   """, cliente.getIdCliente());
         String respuesta, newString, oldString = "";
         long newLong, oldLong = 0L;
+        int newInt, oldInt = 0;
         boolean change, valid;
         do {
             change = false;
@@ -168,6 +176,14 @@ public class MenuCliente {
                         change = true;
                     }
                     break;
+                case "5":
+                    newInt = LeerInt("Ingrese el DNI del cliente", 1000000, 80000000);
+                    if(newInt != cliente.getDni() && newInt >= 1000000){
+                        oldInt = cliente.getDni();
+                        cliente.setDni(newInt);
+                        change = true;
+                    }
+                    break;
                 case "0":
                     return;
                 default:
@@ -205,6 +221,8 @@ public class MenuCliente {
                         case "4":
                             cliente.setTelefono(oldLong);
                             break;
+                        case "5":
+                            cliente.setDni(oldInt);
                     }
                 }
             } else if (valid) {

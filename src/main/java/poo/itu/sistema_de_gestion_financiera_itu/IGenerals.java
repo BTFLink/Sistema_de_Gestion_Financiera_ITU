@@ -6,6 +6,7 @@ package poo.itu.sistema_de_gestion_financiera_itu;
 
 import Connections.Exportador;
 import Connections.InformesGeneralesDAO;
+import Connections.PrestamosDAO;
 import Entity.Cliente;
 import Entity.InformesGeneralesEntidad;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import prestamo.Cuota;
+import prestamo.Pago;
 import prestamo.Prestamo;
 
 /**
@@ -40,7 +42,7 @@ public class IGenerals {
             menu = """
                     \tMenu de Informes
                     1) Informes con Codigo Identificador
-                    2) Informes Generales
+                    2) Exportador de Tablas
                     3) Modo de exportacion: %s
                     0) Salir
                     """;
@@ -52,7 +54,7 @@ public class IGenerals {
                     InformeConCodigo();
                     break;
                 case "2":
-                    System.out.println("UNDERDEVELOPMENT");
+                    InformeGeneral();
                     break;
                 case "3":
                     exportar = !exportar;
@@ -247,5 +249,93 @@ public class IGenerals {
         if (exportar) {
             Exportador.FileExporter(Datos.toString(), !UUID.equals("PAG-*"));
         }
+    }
+
+    private void InformeGeneral() {
+        do {
+            menu = """
+                    \tExportador De Tablas
+                    1) Exportar Clientes
+                    2) Exportar Prestamos
+                    3) Exportar Cuotas
+                    4) Exportar Pagos
+                    0) Salir
+                    """;
+            respuesta = "";
+            respuesta = sc.nextLine();
+            switch (respuesta) {
+                case "1":
+                    ExpoTablaCliente();
+                    break;
+                case "2":
+                    ExpoTablaPrestamo();
+                    break;
+                case "3":
+                    ExpoTablaCuota();
+                    break;
+                case "4":
+                    ExpoTablaPago();
+                    break;
+                case "0":
+                    return;
+                default:
+                    System.out.println("Opcion Invalida");
+            }
+        } while (true);
+    }
+
+    private void ExpoTablaCliente() {
+        List<Cliente> Clientes = Cliente.traerTodos();
+        StringBuilder Datos = new StringBuilder();
+        Datos.append(String.format("%-20s | %-50s | %-10s | %-15s | %-100s | %-255s",
+                "UUID", "Nombre", "DNI", "Telefono", "Direccion", "Email"));
+        for (Cliente cliente : Clientes) {
+            Datos.append(cliente.printClientData(true));
+        }
+        Exportador.FileExporter(Datos.toString(), true);
+    }
+
+    private void ExpoTablaPrestamo() {
+        List<Prestamo> Prestamos = PrestamosDAO.ListaDePrestamos("PRE-*");
+        StringBuilder Datos = new StringBuilder();
+        for (Prestamo prestamo : Prestamos) {
+            Datos.append(prestamo.printPrestamo(true));
+        }
+        Exportador.FileExporter(Datos.toString(), true);
+    }
+
+    private void ExpoTablaCuota() {
+        List<Cuota> Cuotas = PrestamosDAO.ListaDeCuotas("CUO-*");
+        StringBuilder Datos = new StringBuilder();
+        Datos.append(String.format(
+                "%-25s | %-25s | %10s | %10s | %-10s | %-20s | %-10s |",
+                "ID Prestamo",
+                "ID Cuota",
+                "Monto",
+                "Interés",
+                "Pagado",
+                "Vencimiento",
+                "Contiene Mora"
+        ));
+        for (Cuota cuota : Cuotas) {
+            Datos.append(cuota.printCuotaConMora(cuota, false));
+        }
+        Exportador.FileExporter(Datos.toString(), true);
+    }
+
+    private void ExpoTablaPago() {
+        List<Pago> Pagos = PrestamosDAO.ListaDePagos("PAG-*");
+        StringBuilder Datos = new StringBuilder();
+        Datos.append(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |%n" ,
+                    "ID Cuota",
+                    "ID Pago",
+                    "Penalidad",
+                    "Monto Pago",
+                    "Fecha Del Pago"
+            ));
+        for (Pago pago : Pagos) {
+            Datos.append(pago.printPago(false));
+        }
+        Exportador.FileExporter(Datos.toString(), true);
     }
 }

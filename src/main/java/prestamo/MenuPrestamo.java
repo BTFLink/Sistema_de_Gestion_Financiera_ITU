@@ -7,19 +7,22 @@ import java.util.Scanner;
 import static Utils.LeerDataType.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MenuPrestamo {
 
     private final Scanner scanner;
     private String clienteActual;
-    private final String INVALIDOPTION = "Opcion Invalida";
+    private final String INVALIDOPTION = "Opcion Invalida", ClaveSim = "SIM-";
     private boolean volverAPrincipal;
+    private boolean ModuloRegistro;
 
     public MenuPrestamo() {
         scanner = new Scanner(System.in);
         clienteActual = "";
-        volverAPrincipal=true;
+        volverAPrincipal = true;
+        ModuloRegistro = false;
     }
 
     public void mostrarMenuPrincipal() {
@@ -30,17 +33,19 @@ public class MenuPrestamo {
                     2. Crear nuevo préstamo
                     3. Registrar pago
                     4. Mostrar plan de cuotas
-                    5. Salir
+                    0. Salir
                     Seleccione una opción: """;
         do {
             opcion = LeerInt(menu, 1, 5);
             //Selecciona un cliente para trabajar exclusivamente con ese o ingresar el codigo una vez por modulo
             switch (opcion) {
                 case 1:
-                    seleccionarCliente(false); 
+                    seleccionarCliente(false);
                     break;
                 case 2:
+                    ModuloRegistro = true;
                     crearPrestamo();
+                    ModuloRegistro = false;
                     break;
                 case 3:
                     registrarPago();
@@ -48,21 +53,24 @@ public class MenuPrestamo {
                 case 4:
                     mostrarPlanCuotas();
                     break;
-                case 5:
+                case 0:
                     System.out.println("Saliendo del sistema...");
                     break;
                 default:
                     System.out.println("Opción no válida.");
             }
-        } while (opcion != 5);
+        } while (opcion != 0);
     }
 
     private void seleccionarCliente(boolean desvio) {
+        if(ModuloRegistro){System.out.println("Utilice \"SIM-\" para iniciar el modo de simulacion");}
         System.out.print("\nIngrese UUID del cliente: ");
         clienteActual = scanner.nextLine();//Buscar Cliente en BD //Si no lo encuentra retornar
-        
+
         if (Cliente.existeCliente(clienteActual)) {
             System.out.println("Cliente seleccionado: " + clienteActual);
+        } else if (clienteActual.equalsIgnoreCase(ClaveSim) && ModuloRegistro) {
+            System.out.println("Iniciando el Modo Simulacion de Registro");
         } else {
             System.out.println("No se ha encontrado el cliente");
             clienteActual = "";
@@ -72,12 +80,12 @@ public class MenuPrestamo {
         if (desvio) {
             return;
         }
-        volverAPrincipal=false;
+        volverAPrincipal = false;
         mostrarMenuCliente();
     }
 
     private void crearPrestamo() {
-        
+
         if (clienteActual.isEmpty() || clienteActual.isBlank()) {
             seleccionarCliente(true);
             if (clienteActual.isEmpty() || clienteActual.isBlank()) {
@@ -85,6 +93,9 @@ public class MenuPrestamo {
             }
         }
 
+        System.out.println("""
+                           Para cancelar el registro, ingresando el valor "0" en cualquier momento
+                           Excepto en los lugares marcados con *""");
         System.out.println("\n=== CREAR NUEVO PRÉSTAMO ===");
         System.out.println("Cliente: " + clienteActual);
 
@@ -92,9 +103,12 @@ public class MenuPrestamo {
         PRESTAPAKA.setIdCliente(clienteActual);
         int tipoPrestamo;
         do {
-            tipoPrestamo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ", 1, 2);
+            tipoPrestamo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ", 0, 2);
             if (tipoPrestamo == 1 || tipoPrestamo == 2) {
                 break;
+            }
+            if (tipoPrestamo == 0) {
+                return;
             }
             System.out.println(INVALIDOPTION);
         } while (true);
@@ -103,11 +117,11 @@ public class MenuPrestamo {
         double monto;
         do {
             if (tipoPrestamo == 1) {
-                monto = LeerDouble("Monto del préstamo: ", 10000, 20000000);
+                monto = LeerDouble("Monto del préstamo (MIN: 10K; MAX : 20M)*", 10000, 20000000);
             } else {
-                monto = LeerDouble("Monto del préstamo: ", 5000000, 70000000);
+                monto = LeerDouble("Monto del préstamo:(MIN: 5M;  MAX : 70M)*", 5000000, 70000000);
             }
-            if (monto != Double.NaN) {
+            if (!Double.isNaN(monto)) {
                 break;
             }
             System.out.println("Monto Invalido");
@@ -117,7 +131,10 @@ public class MenuPrestamo {
         double tasa;
         do {
             tasa = LeerDouble("Tasa de interés inicial anual (%): ", 0, 100);
-            if (monto != Double.NaN) {
+            if (tasa == 0) {
+                return;
+            }
+            if (!Double.isNaN(tasa)) {
                 break;
             }
             System.out.println("Interes Invalido");
@@ -130,6 +147,9 @@ public class MenuPrestamo {
             if (tipoCuota == 1 || tipoCuota == 2) {
                 break;
             }
+            if (tipoCuota == 0) {
+                return;
+            }
             System.out.println(INVALIDOPTION);
         } while (true);
         PRESTAPAKA.setTipoCuota(tipoCuota == 1);
@@ -139,18 +159,26 @@ public class MenuPrestamo {
         PRESTAPAKA.setNumeroCuotas(cuotas);
 
         //Modificar y añadir a base de datos
-        
         //prestamos.add(prestamo);//Enviar Prestamo a BD
+        if (clienteActual.equals(ClaveSim)) {
+            mostrarPlanCuotas(PRESTAPAKA);
+            System.out.println("Terminando Simulación");
+            return;
+        }
         for (int i = 0; i < 3; i++) {
             //if(CreatePrestamoDB(prestamo))
             if (PrestamosDAO.CreatePrestamoDB(PRESTAPAKA)) {
                 System.out.println("Prestamo registrado con exito");
-                if(volverAPrincipal){clienteActual="";}
+                if (volverAPrincipal) {
+                    clienteActual = "";
+                }
                 return;
             }
         }
-        
-        if(volverAPrincipal){clienteActual="";}  //en caso de no haber usado selector de cliente reinicia la variable
+
+        if (volverAPrincipal) {
+            clienteActual = "";
+        }  //en caso de no haber usado selector de cliente reinicia la variable
         System.out.println("No se pudo registrar el prestamo, intentelo mas tarde");
     }
 
@@ -179,9 +207,9 @@ public class MenuPrestamo {
         List<Cuota> cuotasVencidas = Cuota.verificarCuotasEnMora(todasCuotas);
 
         if (!cuotasVencidas.isEmpty()) {
-            
-            pagarCuotas(cuotasVencidas, "cuotas vencidas",true);
-            
+
+            pagarCuotas(cuotasVencidas, "cuotas vencidas", true);
+
             // Reflejar pagos en la lista principal
             for (Cuota vencida : cuotasVencidas) {
                 for (Cuota cuota : todasCuotas) {
@@ -194,26 +222,30 @@ public class MenuPrestamo {
             // Verificar que no queden cuotas vencidas sin pagar
             if (cuotasVencidas.stream().anyMatch(c -> !c.isPagado())) {
                 System.out.println("Quedan cuotas en mora. Termine de pagarlas para registrar otros pagos.");
-                if(volverAPrincipal){clienteActual="";}
+                if (volverAPrincipal) {
+                    clienteActual = "";
+                }
                 return;
             }
         }
 
-        pagarCuotas(todasCuotas, "cuotas restantes",false);
-        if(volverAPrincipal){clienteActual="";}
+        pagarCuotas(todasCuotas, "cuotas restantes", false);
+        if (volverAPrincipal) {
+            clienteActual = "";
+        }
     }
 
-    private boolean pagarCuotas(List<Cuota> cuotas, String mensaje,boolean conMora) {
+    private boolean pagarCuotas(List<Cuota> cuotas, String mensaje, boolean conMora) {
         while (true) {
             long pendientes = cuotas.stream().filter(c -> !c.isPagado()).count();
             if (pendientes == 0) {
                 System.out.println("No quedan " + mensaje + " que pagar");
                 return true;
             }
-            
-            if(conMora){
+
+            if (conMora) {
                 Cuota.showListCuotasConMora(cuotas);
-            }else{
+            } else {
                 Cuota.showListCuotas(cuotas);
             }
             System.out.println("Ingrese el número de ID de una de las " + mensaje + " para seleccionarla\nIngrese -1 para salir sin realizar pagos");
@@ -277,9 +309,14 @@ public class MenuPrestamo {
         System.out.printf("\nTOTAL A DEVOLVER APROXIMADO: $%.2f (Capital: $%.2f + Intereses: $%.2f)%n",
                 totalAPagar, prestamo.getMonto(), totalIntereses);
 
-        List<Cuota> listaCuotas = ListaDeCuotas(prestamo.getIdPrestamo());
-        List<Pago> listaPagos = ListaDePagos(prestamo.getIdPrestamo());
-
+        List<Cuota> listaCuotas;
+        List<Pago> listaPagos = new ArrayList<>();
+        if (clienteActual.equals(ClaveSim)) {
+            listaCuotas = GenerarListaCuotas(prestamo);
+        } else {
+            listaCuotas = ListaDeCuotas(prestamo.getIdPrestamo());
+            listaPagos = ListaDePagos(prestamo.getIdPrestamo());
+        }
         if (listaCuotas.isEmpty()) {
             System.out.println("No es posible mostrar datos de Cuotas");
             return;
@@ -321,7 +358,27 @@ public class MenuPrestamo {
 
         System.out.print("\nPresione Enter para continuar...");
         scanner.nextLine();
-        if(volverAPrincipal){clienteActual="";}
+        if (volverAPrincipal) {
+            clienteActual = "";
+        }
+    }
+
+    private List<Cuota> GenerarListaCuotas(Prestamo prestamo) {
+        List<Cuota> Generando = new ArrayList<>();
+        LocalDateTime hoy = LocalDateTime.now();
+        double TasaInteresMensual = prestamo.getInteresInicial() / 12;
+
+        for (int i = 1; i <= prestamo.getNumeroCuotas(); i++) {
+            if (prestamo.isTipoCuota()) {
+                Generando.add(new Cuota(ClaveSim, ClaveSim + "0" + i, prestamo.calcularCuotaFija(), TasaInteresMensual, false, hoy.plusMonths(i).withDayOfMonth(10).withHour(0).withMinute(0).withSecond(0).withNano(0)));
+            } else {
+                if (((i - 1) % 3 == 0) && (i - 1 != 0)) {
+                    TasaInteresMensual += 1;
+                }
+                Generando.add(new Cuota(ClaveSim, ClaveSim + "0" + i, prestamo.calcularCuota(i), TasaInteresMensual, false, hoy.plusMonths(i).withDayOfMonth(10).withHour(0).withMinute(0).withSecond(0).withNano(0)));
+            }
+        }
+        return Generando;
     }
 
     private void mostrarMenuCliente() {
@@ -331,7 +388,7 @@ public class MenuPrestamo {
                     1. Crear nuevo préstamo
                     2. Registrar pago
                     3. Mostrar plan de cuotas
-                    4. Volver al menú principal
+                    0. Volver al menú principal
                     Seleccione una opción: """;
         do {
             opcion = LeerInt(menu, 1, 4);
@@ -346,7 +403,7 @@ public class MenuPrestamo {
                 case 3:
                     mostrarPlanCuotas();
                     break;
-                case 4:
+                case 0:
                     System.out.println("Volviendo al menú principal...");
                     break;
                 default:
@@ -379,7 +436,7 @@ public class MenuPrestamo {
             System.out.println("Ingrese el número de ID de uno de los préstamos para seleccionarlo");
             Prestamo.ShowPrestamos(Nprestamos);
             int seleccionPrestamo = LeerInt("Ingrese su selección", 1, Nprestamos.size()) - 1;
-            if(seleccionPrestamo<0||seleccionPrestamo>=Nprestamos.size()){
+            if (seleccionPrestamo < 0 || seleccionPrestamo >= Nprestamos.size()) {
                 return null;
             }
             return Nprestamos.get(seleccionPrestamo);
