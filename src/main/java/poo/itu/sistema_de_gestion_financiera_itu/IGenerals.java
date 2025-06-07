@@ -261,6 +261,7 @@ public class IGenerals {
                     4) Exportar Pagos
                     0) Salir
                     """;
+            System.out.println(menu);
             respuesta = "";
             respuesta = sc.nextLine();
             switch (respuesta) {
@@ -290,6 +291,7 @@ public class IGenerals {
         Datos.append(String.format("%-20s | %-50s | %-10s | %-15s | %-100s | %-255s",
                 "UUID", "Nombre", "DNI", "Telefono", "Direccion", "Email"));
         for (Cliente cliente : Clientes) {
+            Datos.append("\n");
             Datos.append(cliente.printClientData(true));
         }
         Exportador.FileExporter(Datos.toString(), true);
@@ -298,8 +300,21 @@ public class IGenerals {
     private void ExpoTablaPrestamo() {
         List<Prestamo> Prestamos = PrestamosDAO.ListaDePrestamos("PRE-*");
         StringBuilder Datos = new StringBuilder();
+        Datos.append(String.format(
+                    "%-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
+                    "ID Cliente",
+                    "ID Préstamo",
+                    "Monto",
+                    "Interés",
+                    "Cuotas",
+                    "Tipo Préstamo",
+                    "Cuota",
+                    "Fecha Creación",
+                    "Estado"
+            ));
         for (Prestamo prestamo : Prestamos) {
-            Datos.append(prestamo.printPrestamo(true));
+            Datos.append("\n");
+            Datos.append(prestamo.printPrestamo(false));
         }
         Exportador.FileExporter(Datos.toString(), true);
     }
@@ -318,6 +333,7 @@ public class IGenerals {
                 "Contiene Mora"
         ));
         for (Cuota cuota : Cuotas) {
+            Datos.append("\n");
             Datos.append(cuota.printCuotaConMora(cuota, false));
         }
         Exportador.FileExporter(Datos.toString(), true);
@@ -326,7 +342,7 @@ public class IGenerals {
     private void ExpoTablaPago() {
         List<Pago> Pagos = PrestamosDAO.ListaDePagos("PAG-*");
         StringBuilder Datos = new StringBuilder();
-        Datos.append(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |%n" ,
+        Datos.append(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |" ,
                     "ID Cuota",
                     "ID Pago",
                     "Penalidad",
@@ -334,6 +350,7 @@ public class IGenerals {
                     "Fecha Del Pago"
             ));
         for (Pago pago : Pagos) {
+            Datos.append("\n");
             Datos.append(pago.printPago(false));
         }
         Exportador.FileExporter(Datos.toString(), true);
