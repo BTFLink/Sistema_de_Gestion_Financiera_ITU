@@ -118,8 +118,8 @@ public class Cuota {
     public static void showListCuotas(List<Cuota> listaCuotas) {
 
         String encabezado = String.format(
-                "%-3s | %-25s | %10s | %10s | %-10s | %-20s |",
-                "ID",
+                "%-7s | %-25s | %10s | %10s | %-10s | %-20s |",
+                "Indice",
                 "ID Cuota",
                 "Monto",
                 "Interés",
@@ -129,7 +129,7 @@ public class Cuota {
         System.out.println(encabezado);
         int ID=1;
         for (Cuota cuota : listaCuotas) {
-            System.out.printf("%-3s | %s%n",ID,cuota.toColumnString());
+            System.out.printf("%-7s | %s%n",ID,cuota.toColumnString());
             ID++;
         }
 

@@ -59,13 +59,19 @@ public class MenuPrestamo {
                 default:
                     System.out.println("Opción no válida.");
             }
+            clienteActual = "";
         } while (opcion != 0);
     }
 
     private void seleccionarCliente(boolean desvio) {
-        if(ModuloRegistro){System.out.println("Utilice \"SIM-\" para iniciar el modo de simulacion");}
+        if (ModuloRegistro) {
+            System.out.println("Utilice \"SIM-\" para iniciar el modo de simulacion");
+        }
         System.out.print("\nIngrese UUID del cliente: ");
         clienteActual = scanner.nextLine();//Buscar Cliente en BD //Si no lo encuentra retornar
+        if (!clienteActual.equals(ClaveSim)) {
+            clienteActual = LeerUUID("CLI", clienteActual);
+        }
 
         if (Cliente.existeCliente(clienteActual)) {
             System.out.println("Cliente seleccionado: " + clienteActual);
@@ -248,7 +254,7 @@ public class MenuPrestamo {
             } else {
                 Cuota.showListCuotas(cuotas);
             }
-            System.out.println("Ingrese el número de ID de una de las " + mensaje + " para seleccionarla\nIngrese -1 para salir sin realizar pagos");
+            System.out.println("Ingrese el número de Indice de una de las " + mensaje + " para seleccionarla\nIngrese -1 para salir sin realizar pagos");
             int seleccion = LeerInt("Ingrese su selección", -1, cuotas.size());
             if (seleccion == -1) {
                 return false;
@@ -409,7 +415,7 @@ public class MenuPrestamo {
                 default:
                     System.out.println("Opción no válida.");
             }
-        } while (opcion != 4);
+        } while (opcion != 0);
     }
 
     private int leerNumeroCuotas(int tipo) {

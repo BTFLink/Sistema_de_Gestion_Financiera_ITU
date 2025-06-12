@@ -216,7 +216,7 @@ public class Cliente {
     }
 
     public static boolean existeCliente(String UUID) {
-        if (!UUID.matches("^CLI-[0-9A-Fa-f]{16}$")) {
+        if (!UUID.matches("^CLI-[0-9A-Fa-f]{16,}$")) {
             System.out.println("Identificador Invalido");
             return false;
         }

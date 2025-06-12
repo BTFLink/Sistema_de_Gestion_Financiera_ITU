@@ -9,6 +9,7 @@ import Connections.InformesGeneralesDAO;
 import Connections.PrestamosDAO;
 import Entity.Cliente;
 import Entity.InformesGeneralesEntidad;
+import Utils.LeerDataType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,31 +80,34 @@ public class IGenerals {
                  """;
             System.out.println(menu);
             respuesta = "";
-            respuesta = sc.nextLine();
-            if (revisorUUID(respuesta)) {
-                switch (respuesta.substring(0, 4)) {
-                    case "CLI-":
-                        ICCCliente(respuesta);
-                        return;
-                    case "PRE-":
-                        ICCPrestamo(respuesta);
-                        return;
-                    case "CUO-":
-                        ICCCuota(respuesta);
-                        return;
-                    case "PAG-":
-                        ICCPago(respuesta);
-                        return;
-                    case "EXT-":
-                        return;
-                    default:
-                        System.out.println("Opcion Invalida");
-                }
+            respuesta = LeerDataType.LeerUUID(sc.nextLine());
+
+            switch (respuesta.substring(0, 4)) {
+                case "CLI-":
+                    ICCCliente(respuesta);
+                    return;
+                case "PRE-":
+                    ICCPrestamo(respuesta);
+                    return;
+                case "CUO-":
+                    ICCCuota(respuesta);
+                    return;
+                case "PAG-":
+                    ICCPago(respuesta);
+                    return;
+                case "EXT-":
+                    return;
+                default:
+                    System.out.println("Opcion Invalida");
             }
 
         } while (true);
     }
 
+    /*
+    
+    Codigo inutilizado por LeerUUID
+    
     private boolean revisorUUID(String UUID) {
         String RegExCli = "^CLI-(\\*|[0-9A-Fa-f]{16,})$",
                 RegExPre = "^PRE-(\\*|[0-9A-Fa-f]{16,})$",
@@ -112,7 +116,8 @@ public class IGenerals {
 
         return UUID.matches(RegExCli) || UUID.matches(RegExPre) || UUID.matches(RegExCuo) || UUID.matches(RegExPag) || UUID.contains("EXT-");
     }
-
+    */
+    
     private void ICCCliente(String UUID) {
         StringBuilder Datos = new StringBuilder();
         if (UUID.equals("CLI-*")) {
@@ -301,17 +306,17 @@ public class IGenerals {
         List<Prestamo> Prestamos = PrestamosDAO.ListaDePrestamos("PRE-*");
         StringBuilder Datos = new StringBuilder();
         Datos.append(String.format(
-                    "%-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
-                    "ID Cliente",
-                    "ID Préstamo",
-                    "Monto",
-                    "Interés",
-                    "Cuotas",
-                    "Tipo Préstamo",
-                    "Cuota",
-                    "Fecha Creación",
-                    "Estado"
-            ));
+                "%-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
+                "ID Cliente",
+                "ID Préstamo",
+                "Monto",
+                "Interés",
+                "Cuotas",
+                "Tipo Préstamo",
+                "Cuota",
+                "Fecha Creación",
+                "Estado"
+        ));
         for (Prestamo prestamo : Prestamos) {
             Datos.append("\n");
             Datos.append(prestamo.printPrestamo(false));
@@ -342,13 +347,13 @@ public class IGenerals {
     private void ExpoTablaPago() {
         List<Pago> Pagos = PrestamosDAO.ListaDePagos("PAG-*");
         StringBuilder Datos = new StringBuilder();
-        Datos.append(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |" ,
-                    "ID Cuota",
-                    "ID Pago",
-                    "Penalidad",
-                    "Monto Pago",
-                    "Fecha Del Pago"
-            ));
+        Datos.append(String.format("%-25s | %-25s | %-10s | %-12s | %-15s |",
+                "ID Cuota",
+                "ID Pago",
+                "Penalidad",
+                "Monto Pago",
+                "Fecha Del Pago"
+        ));
         for (Pago pago : Pagos) {
             Datos.append("\n");
             Datos.append(pago.printPago(false));

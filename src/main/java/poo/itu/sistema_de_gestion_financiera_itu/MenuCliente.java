@@ -41,7 +41,7 @@ public class MenuCliente {
                     editarCliente();
                     break;
                 case "3":
-                    Cliente.searchAClient(EnterUUID()).showClientData(false);
+                    Cliente.searchAClient(LeerUUID("CLI", scanner.nextLine())).showClientData(false);
                     break;
                 case "4":
                     Cliente.showClientList(Cliente.traerTodos());
@@ -111,7 +111,7 @@ public class MenuCliente {
     }
 
     private static void editarCliente() {
-        String UUID = EnterUUID(); //Se verifica si el UUID ingresado es valido, o sale del editor en caso de no serlo
+        String UUID = LeerUUID("CLI", scanner.nextLine()); //Se verifica si el UUID ingresado es valido, o sale del editor en caso de no serlo
         if (UUID.equals("")) {
             return;
         }
@@ -232,6 +232,9 @@ public class MenuCliente {
         } while (true);
     }
 
+    /*
+    Codigo inutilizado (Remplazado por LeerUUID en LeerDataType)
+    
     private static String EnterUUID() { //Verificador de UUID
         String UUID = "";
         System.out.println("Ingrese el UUID del cliente");
@@ -249,5 +252,6 @@ public class MenuCliente {
         }
         return UUID;
     }
+    */
 
 }
