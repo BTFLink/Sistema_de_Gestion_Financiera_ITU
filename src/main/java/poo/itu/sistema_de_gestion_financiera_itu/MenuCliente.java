@@ -14,11 +14,12 @@ import java.util.Scanner;
  */
 public class MenuCliente {
 //Valores basicos para el funcionamiento y regulacion del programa
+
     static Scanner scanner = new Scanner(System.in);
     static String respuesta;
     private static final String UNERR = "Error Inesperado, volviendo", INVALIDOPTION = "Opcion Invalida",
             INVALIDDATA = "Entrada Invalida", REGEXUUID = "^CLI-[0-9A-Fa-f]{16}$",
-            REGEXNA = "^[a-zA-Z√°√©√≠√≥√∫√Å√â√ç√ì√ö√±√ë\\s%_]{1,50}$",
+            REGEXNA = "^[a-zA-Z·ÈÌÛ˙¡…Õ”⁄Ò—\\s%_]{1,50}$",
             REGEXEMAIL = "^(?=.{1,255}$)[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
     public static void main() {
@@ -54,16 +55,26 @@ public class MenuCliente {
         } while (true);
     }
 
+    /* Para pruebas de Codificacion
+    private static void EnTE() {
+         System.out.println("Encoding actual: " + System.getProperty("file.encoding"));
+        String nombre = scanner.nextLine();
+        for (int i = 0; i < nombre.length(); i++) {
+            System.out.println("Char en posiciÛn "+i+": " + nombre.charAt(i));
+            System.out.println("CÛdigo Unicode: " + (int) nombre.charAt(i));
+        }
+    }
+    */
     private static void registrarCliente() {
         Cliente cliente = new Cliente();
         boolean nombre = false, dni = false, direccion = false, email = false, telefono = false, compleate;
         do {
             if (!nombre) {
-                System.out.println("Ingrese nombre y apellido del cliente (50 char max)");
+                System.out.println("Ingrese nombre y apellido del cliente (50 char m·x)");
                 cliente.setNombre(scanner.nextLine());
             }
-            
-            if(!dni){
+
+            if (!dni) {
                 System.out.println("Ingrese el DNI del cliente");
                 cliente.setDni(LeerInt(1000000, 80000000));
             }
@@ -84,7 +95,7 @@ public class MenuCliente {
 
             //Esta seccion verifica que todos los valores ingresado para cliente sean validos antes de continuar
             nombre = cliente.getNombre().matches(REGEXNA);
-            dni = cliente.getDni()>=1000000;
+            dni = cliente.getDni() >= 1000000;
             email = cliente.getCorreoElectronico().matches(REGEXEMAIL);
             direccion = !cliente.getDireccion().equals("");
             telefono = (cliente.getTelefono() > 1000000000L && cliente.getTelefono() < 6000000000L);
@@ -94,7 +105,7 @@ public class MenuCliente {
                 System.out.println("Hay uno o mas datos mal ingresados");
             }
         } while (!compleate);
-        
+
         //Aqui se intenta registrar al cliente, tiene 3 intentos en caso de fallo, si no funciona avisa de un fallo en el registro
         try {
             for (int i = 0; i < 3; i++) {
@@ -138,7 +149,7 @@ public class MenuCliente {
             valid = true;
             System.out.println(menu);
             respuesta = scanner.nextLine();
-            
+
             //Se elige lo que se desea editar, en caso de ingresar un mismo valor o uno invalido el programa no realizara ningun cambio
             switch (respuesta) {
                 case "1":
@@ -178,7 +189,7 @@ public class MenuCliente {
                     break;
                 case "5":
                     newInt = LeerInt("Ingrese el DNI del cliente", 1000000, 80000000);
-                    if(newInt != cliente.getDni() && newInt >= 1000000){
+                    if (newInt != cliente.getDni() && newInt >= 1000000) {
                         oldInt = cliente.getDni();
                         cliente.setDni(newInt);
                         change = true;
@@ -252,6 +263,5 @@ public class MenuCliente {
         }
         return UUID;
     }
-    */
-
+     */
 }
