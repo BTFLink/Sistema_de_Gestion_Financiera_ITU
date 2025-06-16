@@ -82,24 +82,26 @@ public class IGenerals {
             respuesta = "";
             respuesta = LeerDataType.LeerUUID(sc.nextLine());
 
-            switch (respuesta.substring(0, 4)) {
-                case "CLI-":
-                    ICCCliente(respuesta);
-                    return;
-                case "PRE-":
-                    ICCPrestamo(respuesta);
-                    return;
-                case "CUO-":
-                    ICCCuota(respuesta);
-                    return;
-                case "PAG-":
-                    ICCPago(respuesta);
-                    return;
-                case "EXT-":
-                    return;
-                default:
-                    System.out.println("Opcion Invalida");
-            }
+            if (respuesta.length() > 4) {
+                switch (respuesta.substring(0, 4)) {
+                    case "CLI-":
+                        ICCCliente(respuesta);
+                        return;
+                    case "PRE-":
+                        ICCPrestamo(respuesta);
+                        return;
+                    case "CUO-":
+                        ICCCuota(respuesta);
+                        return;
+                    case "PAG-":
+                        ICCPago(respuesta);
+                        return;
+                    case "EXT-":
+                        return;
+                    default:
+                        System.out.println("Opcion Invalida");
+                }
+            }else{System.out.println("Codigo Invalido");}
 
         } while (true);
     }
@@ -116,8 +118,7 @@ public class IGenerals {
 
         return UUID.matches(RegExCli) || UUID.matches(RegExPre) || UUID.matches(RegExCuo) || UUID.matches(RegExPag) || UUID.contains("EXT-");
     }
-    */
-    
+     */
     private void ICCCliente(String UUID) {
         StringBuilder Datos = new StringBuilder();
         if (UUID.equals("CLI-*")) {

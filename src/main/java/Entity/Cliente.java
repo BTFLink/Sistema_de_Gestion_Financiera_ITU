@@ -185,7 +185,7 @@ public class Cliente {
                     cliente.setTelefono(getLongSafe(rs, "telefono"));
                     cliente.setDni(getIntSafe(rs, "dni"));
                 }
-            }
+            }else{return new Cliente();}
         } catch (SQLException e) {
             e.printStackTrace();
         }

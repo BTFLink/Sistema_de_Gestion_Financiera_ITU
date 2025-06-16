@@ -94,7 +94,7 @@ public class Cuota {
                 idCuota,
                 monto,
                 interes,
-                pagado ? "SÃ­" : "No",
+                pagado ? "Sí­" : "No",
                 vencimiento != null ? vencimiento.toString() : "null"
         );
     }
@@ -122,7 +122,7 @@ public class Cuota {
                 "Indice",
                 "ID Cuota",
                 "Monto",
-                "InterÃ©s",
+                "Interés",
                 "Pagado",
                 "Vencimiento"
         );
@@ -141,7 +141,7 @@ public class Cuota {
                 "ID Prestamo",
                 "ID Cuota",
                 "Monto",
-                "InterÃ©s",
+                "Interés",
                 "Pagado",
                 "Vencimiento",
                 "Contiene Mora"
@@ -159,7 +159,7 @@ public class Cuota {
                 cuota.getIdCuota(),
                 cuota.getMonto(),
                 cuota.getInteres(),
-                cuota.isPagado() ? "SÃ­" : "No",
+                cuota.isPagado() ? "Sí­" : "No",
                 cuota.getVencimiento() != null ? cuota.getVencimiento().toString() : "null",
                 CalcularMora());
     }
@@ -171,7 +171,7 @@ public class Cuota {
                 "ID Prestamo",
                 "ID Cuota",
                 "Monto",
-                "InterÃ©s",
+                "Interés",
                 "Pagado",
                 "Vencimiento",
                 "Contiene Mora"
@@ -189,7 +189,7 @@ public class Cuota {
                         cuota.getIdCuota(),
                         cuota.getMonto(),
                         cuota.getInteres(),
-                        cuota.isPagado() ? "SÃ­" : "No",
+                        cuota.isPagado() ? "Sí­" : "No",
                         cuota.getVencimiento() != null ? cuota.getVencimiento().toString() : "null",
                         cuota.isPagado() ? "Pagado" : "Sin Mora"));
             }

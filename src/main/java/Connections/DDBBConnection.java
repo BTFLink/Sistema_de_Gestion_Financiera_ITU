@@ -44,7 +44,7 @@ public abstract class DDBBConnection {
             return Conection;
         } catch (ClassNotFoundException | SQLException ex) {
             System.out.println("Error en: DDBBConnection \nError: " + ex.getMessage());
-            System.out.println("No se conectÃ³ a BD " + DB);
+            System.out.println("No se conectó a BD " + DB);
         }
         return null;
     }
@@ -68,12 +68,12 @@ public abstract class DDBBConnection {
                 Conection = Conectar();
                 statement = Conection.prepareStatement(query);
                 result = statement.execute();
-                logConnection("ConexiÃ³n exitosa", query);
+                logConnection("Conexión exitosa", query);
                 Disconect();
                 respuesta = "OK";
 
-            } catch (SQLException e) {
-                logConnection("ConexiÃ³n fallida", query);
+            } catch (NullPointerException | SQLException e) {
+                logConnection("Conexión fallida", query);
                 e.printStackTrace();
                 respuesta = e.getMessage();
             }
@@ -121,7 +121,7 @@ public abstract class DDBBConnection {
             preparedStatement.setString(4, LocalDate.now().toString());
 
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (NullPointerException | SQLException e) {
             e.printStackTrace();
         }
     }
@@ -135,12 +135,12 @@ public abstract class DDBBConnection {
             connection = Conectar();
             statement = connection.prepareStatement(query);
             result = statement.executeQuery();
-            logConnection("ConexiÃ³n exitosa", query);
+            logConnection("Conexión exitosa", query);
             Disconect();
 
             return result;
-        } catch (SQLException e) {
-            logConnection("ConexiÃ³n fallida", query);
+        } catch (NullPointerException | SQLException e) {
+            logConnection("Conexión fallida", query);
             e.printStackTrace();
         }
 

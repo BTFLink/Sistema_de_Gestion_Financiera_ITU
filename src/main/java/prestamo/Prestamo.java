@@ -128,13 +128,13 @@ public class Prestamo {
             prestamo.append(String.format(
                     "%-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |%n",
                     "ID Cliente",
-                    "ID Pr√©stamo",
+                    "ID Prestamo",
                     "Monto",
-                    "Inter√©s",
+                    "Interes",
                     "Cuotas",
-                    "Tipo Pr√©stamo",
+                    "Tipo Prestamo",
                     "Cuota",
-                    "Fecha Creaci√≥n",
+                    "Fecha Creacion",
                     "Estado"
             ));
         }
@@ -158,13 +158,13 @@ public class Prestamo {
                 "%-3s | %-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
                 "ID",
                 "ID Cliente",
-                "ID Pr√©stamo",
+                "ID Prestamo",
                 "Monto",
-                "Inter√©s",
+                "Interes",
                 "Cuotas",
-                "Tipo Pr√©stamo",
+                "Tipo Prestamo",
                 "Cuota",
-                "Fecha Creaci√≥n",
+                "Fecha Creacion",
                 "Estado"
         );
 
@@ -195,12 +195,12 @@ public class Prestamo {
             return;
         }
         this.idCliente = cliente;
-        System.out.println("\n=== CREAR NUEVO PR√âSTAMO ===");
+        System.out.println("\n=== CREAR NUEVO PR…STAMO ===");
         System.out.println("Cliente: " + cliente);
 
         int prestamoTipo;
         do {
-            prestamoTipo = LeerInt("Tipo de pr√©stamo (1=Personal, 2=Hipotecario): ", 1, 2);
+            prestamoTipo = LeerInt("Tipo de prÈstamo (1=Personal, 2=Hipotecario): ", 1, 2);
             if (prestamoTipo == 1 || prestamoTipo == 2) {
                 break;
             }
@@ -210,9 +210,9 @@ public class Prestamo {
 
         do {
             if (prestamoTipo == 1) {
-                this.monto = LeerDouble("Monto del pr√©stamo: ", 10000, 20000000);
+                this.monto = LeerDouble("Monto del prÈstamo: ", 10000, 20000000);
             } else {
-                this.monto = LeerDouble("Monto del pr√©stamo: ", 5000000, 70000000);
+                this.monto = LeerDouble("Monto del prÈstamo: ", 5000000, 70000000);
             }
             if (!Double.isNaN(this.monto)) {
                 break;
@@ -221,7 +221,7 @@ public class Prestamo {
         } while (true);
 
         do {
-            this.interesInicial = LeerDouble("Tasa de inter√©s inicial anual (%): ", 0, 100);
+            this.interesInicial = LeerDouble("Tasa de interÈs inicial anual (%): ", 0, 100);
             if (!Double.isNaN(this.interesInicial)) {
                 break;
             }
@@ -255,18 +255,18 @@ public class Prestamo {
 
         System.out.println("No se pudo registrar el prestamo, intentelo mas tarde");
 
-        //System.out.println("\nPr√©stamo creado exitosamente!");
-        //System.out.println("ID del pr√©stamo: " + id);
+        //System.out.println("\nPrÈstamo creado exitosamente!");
+        //System.out.println("ID del prÈstamo: " + id);
     }
 
     private int leerNumeroCuotas(int tipo) {
         int cuotas;
         do {
-            cuotas = LeerInt("N√∫mero de cuotas: ");
+            cuotas = LeerInt("N˙mero de cuotas: ");
             if (tipo == 2 && (cuotas < 12 || cuotas > 360)) {
-                System.out.println("Pr√©stamo hipotecario debe tener entre 12 a 360 cuotas.");
+                System.out.println("PrÈstamo hipotecario debe tener entre 12 a 360 cuotas.");
             } else if (tipo == 1 && (cuotas < 1 || cuotas > 72)) {
-                System.out.println("Pr√©stamo personal debe tener entre 1 a 72 cuotas.");
+                System.out.println("PrÈstamo personal debe tener entre 1 a 72 cuotas.");
             } else {
                 return cuotas;
             }
@@ -286,7 +286,7 @@ public class Prestamo {
                 int cuotasEnEsteBloque = Math.min(3, cuotasTotales - (i - 1)); // calcula si quedan 1, 2 o 3 cuotas
                 cuota = calcularCuota(tasaMensual, cuotasTotales, getMonto());
 
-                // Muestra para depuraci√≥n
+                // Muestra para depuraciÛn
                 System.out.printf("Cuota para los meses %d a %d: %.2f%n", i, (i + cuotasEnEsteBloque - 1), cuota);
 
                 cuotaTotal += cuota * cuotasEnEsteBloque;
