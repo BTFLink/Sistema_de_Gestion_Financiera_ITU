@@ -28,13 +28,13 @@ public class MenuPrestamo {
     public void mostrarMenuPrincipal() {
         int opcion;
         String menu = """
-                    \n=== SISTEMA DE PRÃ‰STAMOS ===
+                    \n=== SISTEMA DE PRÉSTAMOS ===
                     1. Seleccionar cliente
-                    2. Crear nuevo prÃ©stamo
+                    2. Crear nuevo préstamo
                     3. Registrar pago
                     4. Mostrar plan de cuotas
                     0. Salir
-                    Seleccione una opciÃ³n: """;
+                    Seleccione una opción: """;
         do {
             opcion = LeerInt(menu, 1, 5);
             //Selecciona un cliente para trabajar exclusivamente con ese o ingresar el codigo una vez por modulo
@@ -57,7 +57,7 @@ public class MenuPrestamo {
                     System.out.println("Saliendo del sistema...");
                     break;
                 default:
-                    System.out.println("OpciÃ³n no vÃ¡lida.");
+                    System.out.println("Opción no válida.");
             }
             clienteActual = "";
         } while (opcion != 0);
@@ -73,10 +73,10 @@ public class MenuPrestamo {
             clienteActual = LeerUUID("CLI", clienteActual);
         }
 
-        if (Cliente.existeCliente(clienteActual)) {
-            System.out.println("Cliente seleccionado: " + clienteActual);
-        } else if (clienteActual.equalsIgnoreCase(ClaveSim) && ModuloRegistro) {
+        if (clienteActual.equalsIgnoreCase(ClaveSim) && ModuloRegistro) {
             System.out.println("Iniciando el Modo Simulacion de Registro");
+        } else if (Cliente.existeCliente(clienteActual)) {
+            System.out.println("Cliente seleccionado: " + clienteActual);
         } else {
             System.out.println("No se ha encontrado el cliente");
             clienteActual = "";
@@ -102,14 +102,14 @@ public class MenuPrestamo {
         System.out.println("""
                            Para cancelar el registro, ingresando el valor "0" en cualquier momento
                            Excepto en los lugares marcados con *""");
-        System.out.println("\n=== CREAR NUEVO PRÃ‰STAMO ===");
+        System.out.println("\n=== CREAR NUEVO PRÉSTAMO ===");
         System.out.println("Cliente: " + clienteActual);
 
         Prestamo PRESTAPAKA = new Prestamo();
         PRESTAPAKA.setIdCliente(clienteActual);
         int tipoPrestamo;
         do {
-            tipoPrestamo = LeerInt("Tipo de prÃ©stamo (1=Personal, 2=Hipotecario): ", 0, 2);
+            tipoPrestamo = LeerInt("Tipo de préstamo (1=Personal, 2=Hipotecario): ", 0, 2);
             if (tipoPrestamo == 1 || tipoPrestamo == 2) {
                 break;
             }
@@ -123,9 +123,9 @@ public class MenuPrestamo {
         double monto;
         do {
             if (tipoPrestamo == 1) {
-                monto = LeerDouble("Monto del prÃ©stamo (MIN: 10K; MAX : 20M)*", 10000, 20000000);
+                monto = LeerDouble("Monto del préstamo (MIN: 10K; MAX : 20M)*", 10000, 20000000);
             } else {
-                monto = LeerDouble("Monto del prÃ©stamo:(MIN: 5M;  MAX : 70M)*", 5000000, 70000000);
+                monto = LeerDouble("Monto del préstamo:(MIN: 5M;  MAX : 70M)*", 5000000, 70000000);
             }
             if (!Double.isNaN(monto)) {
                 break;
@@ -136,7 +136,7 @@ public class MenuPrestamo {
 
         double tasa;
         do {
-            tasa = LeerDouble("Tasa de interÃ©s inicial anual (%): ", 0, 100);
+            tasa = LeerDouble("Tasa de interés inicial anual (%): ", 0, 100);
             if (tasa == 0) {
                 return;
             }
@@ -164,11 +164,11 @@ public class MenuPrestamo {
         int cuotas = leerNumeroCuotas(tipoPrestamo);
         PRESTAPAKA.setNumeroCuotas(cuotas);
 
-        //Modificar y aÃ±adir a base de datos
+        //Modificar y añadir a base de datos
         //prestamos.add(prestamo);//Enviar Prestamo a BD
         if (clienteActual.equals(ClaveSim)) {
             mostrarPlanCuotas(PRESTAPAKA);
-            System.out.println("Terminando SimulaciÃ³n");
+            System.out.println("Terminando Simulación");
             return;
         }
         for (int i = 0; i < 3; i++) {
@@ -206,7 +206,7 @@ public class MenuPrestamo {
 
         List<Cuota> todasCuotas = ListaDeCuotas(prestamo.getIdPrestamo(), false);
         if (todasCuotas.isEmpty()) {
-            System.out.println("No se ha podido obtener las cuotas de este prÃ©stamo");
+            System.out.println("No se ha podido obtener las cuotas de este préstamo");
             return;
         }
 
@@ -254,24 +254,24 @@ public class MenuPrestamo {
             } else {
                 Cuota.showListCuotas(cuotas);
             }
-            System.out.println("Ingrese el nÃºmero de Indice de una de las " + mensaje + " para seleccionarla\nIngrese -1 para salir sin realizar pagos");
-            int seleccion = LeerInt("Ingrese su selecciÃ³n", -1, cuotas.size());
+            System.out.println("Ingrese el número de Indice de una de las " + mensaje + " para seleccionarla\nIngrese -1 para salir sin realizar pagos");
+            int seleccion = LeerInt("Ingrese su selección", -1, cuotas.size());
             if (seleccion == -1) {
                 return false;
             }
 
             if (seleccion < 1 || seleccion > cuotas.size()) {
-                System.out.println("SelecciÃ³n invÃ¡lida.");
+                System.out.println("Selección inválida.");
                 continue;
             }
 
             Cuota cuota = cuotas.get(seleccion - 1);
             if (cuota.isPagado()) {
-                System.out.println("La cuota ya estÃ¡ pagada");
+                System.out.println("La cuota ya está pagada");
                 continue;
             }
 
-            int confirmar = LeerInt("Â¿Registrar pago?\n(1) SÃ­ (2) No", 1, 2);
+            int confirmar = LeerInt("¿Registrar pago?\n(1) Sí­ (2) No", 1, 2);
             if (confirmar == 1) {
                 cuota.setPagado(RegistrarPago(cuota));
             } else {
@@ -298,16 +298,16 @@ public class MenuPrestamo {
         System.out.println("\n=== PLAN DE CUOTAS ===");
         System.out.println("Cliente: " + clienteActual);
 
-        // Mostrar resumen del prÃ©stamo
-        System.out.println("\n=== RESUMEN DEL PRÃ‰STAMO ===");
+        // Mostrar resumen del préstamo
+        System.out.println("\n=== RESUMEN DEL PRÉSTAMO ===");
         System.out.printf("Monto total: $%.2f%n", prestamo.getMonto());
-        System.out.printf("Tasa de interÃ©s anual inicial: %.2f%%%n", prestamo.getInteresInicial());
+        System.out.printf("Tasa de interés anual inicial: %.2f%%%n", prestamo.getInteresInicial());
 
         // Calcular intereses aproximados
         double totalIntereses = prestamo.calcularTotalIntereses();
         System.out.printf("Intereses totales aproximados: $%.2f%n", totalIntereses);
 
-        System.out.println("NÃºmero de cuotas: " + prestamo.getNumeroCuotas());
+        System.out.println("Número de cuotas: " + prestamo.getNumeroCuotas());
         System.out.println("Tipo de cuota: " + (prestamo.isTipoCuota() ? "Fijo" : "Variable"));
 
         // Calcular monto total a devolver
@@ -390,14 +390,14 @@ public class MenuPrestamo {
     private void mostrarMenuCliente() {
         int opcion;
         String menu = """
-                    \n=== MENÃš CLIENTE: " + clienteActual + " ===
-                    1. Crear nuevo prÃ©stamo
+                    \n=== MENÚ CLIENTE: " %s " ===
+                    1. Crear nuevo préstamo
                     2. Registrar pago
                     3. Mostrar plan de cuotas
-                    0. Volver al menÃº principal
-                    Seleccione una opciÃ³n: """;
+                    0. Volver al menú principal
+                    Seleccione una opción: """;
         do {
-            opcion = LeerInt(menu, 1, 4);
+            opcion = LeerInt(String.format(menu, clienteActual), 1, 4);
 
             switch (opcion) {
                 case 1:
@@ -410,10 +410,10 @@ public class MenuPrestamo {
                     mostrarPlanCuotas();
                     break;
                 case 0:
-                    System.out.println("Volviendo al menÃº principal...");
+                    System.out.println("Volviendo al menú principal...");
                     break;
                 default:
-                    System.out.println("OpciÃ³n no vÃ¡lida.");
+                    System.out.println("Opción no válida.");
             }
         } while (opcion != 0);
     }
@@ -421,11 +421,11 @@ public class MenuPrestamo {
     private int leerNumeroCuotas(int tipo) {
         int cuotas;
         do {
-            cuotas = LeerInt("NÃºmero de cuotas: ");
+            cuotas = LeerInt("Número de cuotas: ");
             if (tipo == 2 && (cuotas < 12 || cuotas > 360)) {
-                System.out.println("PrÃ©stamo hipotecario debe tener entre 12 a 360 cuotas.");
+                System.out.println("Préstamo hipotecario debe tener entre 12 a 360 cuotas.");
             } else if (tipo == 1 && (cuotas < 1 || cuotas > 72)) {
-                System.out.println("PrÃ©stamo personal debe tener entre 1 a 72 cuotas.");
+                System.out.println("Préstamo personal debe tener entre 1 a 72 cuotas.");
             } else {
                 return cuotas;
             }
@@ -436,12 +436,12 @@ public class MenuPrestamo {
         try {
             List<Prestamo> Nprestamos = ListaDePrestamos(clienteActual, false);
             if (Nprestamos.isEmpty()) {
-                System.out.println("No se encontraron datos de prÃ©stamos de esta persona");
+                System.out.println("No se encontraron datos de préstamos de esta persona");
                 return null;
             }
-            System.out.println("Ingrese el nÃºmero de ID de uno de los prÃ©stamos para seleccionarlo");
+            System.out.println("Ingrese el número de ID de uno de los préstamos para seleccionarlo");
             Prestamo.ShowPrestamos(Nprestamos);
-            int seleccionPrestamo = LeerInt("Ingrese su selecciÃ³n", 1, Nprestamos.size()) - 1;
+            int seleccionPrestamo = LeerInt("Ingrese su selección", 1, Nprestamos.size()) - 1;
             if (seleccionPrestamo < 0 || seleccionPrestamo >= Nprestamos.size()) {
                 return null;
             }
