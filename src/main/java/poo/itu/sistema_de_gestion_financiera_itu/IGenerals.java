@@ -82,7 +82,7 @@ public class IGenerals {
             respuesta = "";
             respuesta = LeerDataType.LeerUUID(sc.nextLine());
 
-            if (respuesta.length() > 4) {
+            if (respuesta.length() >= 4) {
                 switch (respuesta.substring(0, 4)) {
                     case "CLI-":
                         ICCCliente(respuesta);
