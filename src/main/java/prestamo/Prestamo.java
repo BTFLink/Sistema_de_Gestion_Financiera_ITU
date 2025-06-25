@@ -155,8 +155,8 @@ public class Prestamo {
 
     public static void ShowPrestamos(List<Prestamo> Prestamos) {
         String encabezado = String.format(
-                "%-3s | %-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
-                "ID",
+                "%-7s | %-22s | %-22s | %10s | %14s | %13s | %-15s | %-10s | %-20s | %-10s |",
+                "Indice",
                 "ID Cliente",
                 "ID Prestamo",
                 "Monto",
@@ -172,7 +172,7 @@ public class Prestamo {
         int id = 1;
         for (Prestamo Prestamo : Prestamos) {
             System.out.println(String.format(
-                    "%-3s | %-22s | %-22s | %10.2f | %14.2f | %13d | %-15s | %-10s | %-20s | %-10s |",
+                    "%-7s | %-22s | %-22s | %10.2f | %14.2f | %13d | %-15s | %-10s | %-20s | %-10s |",
                     id,
                     Prestamo.getIdCliente(),
                     Prestamo.getIdPrestamo(),

@@ -439,7 +439,7 @@ public class MenuPrestamo {
                 System.out.println("No se encontraron datos de préstamos de esta persona");
                 return null;
             }
-            System.out.println("Ingrese el número de ID de uno de los préstamos para seleccionarlo");
+            System.out.println("Ingrese el número de Indice de uno de los préstamos para seleccionarlo");
             Prestamo.ShowPrestamos(Nprestamos);
             int seleccionPrestamo = LeerInt("Ingrese su selección", 1, Nprestamos.size()) - 1;
             if (seleccionPrestamo < 0 || seleccionPrestamo >= Nprestamos.size()) {
