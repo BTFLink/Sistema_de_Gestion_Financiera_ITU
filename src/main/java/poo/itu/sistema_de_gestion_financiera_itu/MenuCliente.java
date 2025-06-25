@@ -42,7 +42,7 @@ public class MenuCliente {
                     editarCliente();
                     break;
                 case "3":
-                    System.out.println("Ingerse el UUID del cliente:");
+                    System.out.println("Ingrese el UUID del cliente:");
                     Cliente.searchAClient(LeerUUID("CLI", scanner.nextLine())).showClientData(false);
                     break;
                 case "4":
