@@ -140,6 +140,9 @@ public class LeerDataType {
         if (ingresado.contains("EXT-")) {
             return ingresado;
         }
+        if (ingresado.equals("0")) {
+            return ingresado;
+        }
         if (porDefault.equals("")) {
             if (ingresado.length() <= 4) {
                 return "";
@@ -155,9 +158,6 @@ public class LeerDataType {
                 if(ingresado.contains("*")){return porDefault+"-"+ingresado;}
                 return RellenarUUID(porDefault, ingresado);
             }
-        }
-        if (ingresado.equals("0")) {
-            return ingresado;
         }
         return "";
     }

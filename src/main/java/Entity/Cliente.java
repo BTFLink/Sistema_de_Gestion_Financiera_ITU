@@ -166,7 +166,7 @@ public class Cliente {
     }
 
     public static Cliente searchAClient(String UUID) {
-
+        if(UUID.equals("0")||UUID.equals("")){return new Cliente();}
         if (!UUID.contains("CLI-") || UUID.equals("CLI-*")) {
             System.out.println("El UUID es invalido");
             return new Cliente();

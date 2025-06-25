@@ -42,6 +42,7 @@ public class MenuCliente {
                     editarCliente();
                     break;
                 case "3":
+                    System.out.println("Ingerse el UUID del cliente:");
                     Cliente.searchAClient(LeerUUID("CLI", scanner.nextLine())).showClientData(false);
                     break;
                 case "4":
@@ -69,28 +70,33 @@ public class MenuCliente {
         Cliente cliente = new Cliente();
         boolean nombre = false, dni = false, direccion = false, email = false, telefono = false, compleate;
         do {
+            System.out.println("Puede cancelar el registro ingresando el valor 0 donde no haya *");
             if (!nombre) {
                 System.out.println("Ingrese nombre y apellido del cliente (50 char máx)");
                 cliente.setNombre(scanner.nextLine());
+                if(cliente.getNombre().equals("0")){return;}
             }
 
             if (!dni) {
-                System.out.println("Ingrese el DNI del cliente");
+                System.out.println("Ingrese el DNI del cliente*");
                 cliente.setDni(LeerInt(1000000, 80000000));
             }
 
             if (!direccion) {
                 System.out.println("Ingrese direccion del cliente");
                 cliente.setDireccion(scanner.nextLine());
+                if(cliente.getDireccion().equals("0")){return;}
             }
 
             if (!email) {
                 System.out.println("Ingrese el correo electronico del cliente");
                 cliente.setCorreoElectronico(scanner.nextLine());
+                if(cliente.getCorreoElectronico().equals("0")){return;}
             }
 
             if (!telefono) {
                 cliente.setTelefono(LeerLong("Ingrese el telefono del cliente"));
+                if(cliente.getTelefono()==0L){return;}
             }
 
             //Esta seccion verifica que todos los valores ingresado para cliente sean validos antes de continuar
@@ -122,8 +128,9 @@ public class MenuCliente {
     }
 
     private static void editarCliente() {
+        System.out.println("Ingrese el UUID del cliente");
         String UUID = LeerUUID("CLI", scanner.nextLine()); //Se verifica si el UUID ingresado es valido, o sale del editor en caso de no serlo
-        if (UUID.equals("")) {
+        if (UUID.equals("")||UUID.equals("0")) {
             return;
         }
         Cliente cliente = Cliente.searchAClient(UUID);
@@ -154,6 +161,7 @@ public class MenuCliente {
             switch (respuesta) {
                 case "1":
                     System.out.println("Ingrese nombre y apellido del cliente (50 char max)");
+                    System.out.println("Valor actual: "+cliente.getNombre());
                     newString = scanner.nextLine();
                     if (!newString.equals(cliente.getNombre()) && newString.matches(REGEXNA)) {
                         oldString = cliente.getNombre();
@@ -163,6 +171,7 @@ public class MenuCliente {
                     break;
                 case "2":
                     System.out.println("Ingrese direccion del cliente");
+                    System.out.println("Valor actual: "+cliente.getDireccion());
                     newString = scanner.nextLine();
                     if (!newString.equals(cliente.getDireccion()) && !newString.equals("")) {
                         oldString = cliente.getDireccion();
@@ -172,6 +181,7 @@ public class MenuCliente {
                     break;
                 case "3":
                     System.out.println("Ingrese el correo electronico del cliente");
+                    System.out.println("Valor actual: "+cliente.getCorreoElectronico());
                     newString = scanner.nextLine();
                     if (!newString.equals(cliente.getCorreoElectronico()) && newString.matches(REGEXEMAIL)) {
                         oldString = cliente.getCorreoElectronico();
@@ -180,6 +190,7 @@ public class MenuCliente {
                     }
                     break;
                 case "4":
+                    System.out.println("Valor actual: "+cliente.getTelefono());
                     newLong = LeerLong("Ingrese el telefono del cliente");
                     if (newLong != cliente.getTelefono() && (newLong > 1000000000L && newLong < 6000000000L)) {
                         oldLong = cliente.getTelefono();
@@ -188,6 +199,7 @@ public class MenuCliente {
                     }
                     break;
                 case "5":
+                    System.out.println("Valor actual: "+cliente.getDni());
                     newInt = LeerInt("Ingrese el DNI del cliente", 1000000, 80000000);
                     if (newInt != cliente.getDni() && newInt >= 1000000) {
                         oldInt = cliente.getDni();
